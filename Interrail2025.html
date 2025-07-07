@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interrail 2025: Itinerario Interactivo</title>
+    <!-- Manifest para PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Base styles for a clean, modern look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Very light background for ample white space */
+            color: #333; /* Darker text for contrast */
+        }
+        .scrollable-sidebar {
+            /* Allows the sidebar to scroll if content overflows */
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .scrollable-sidebar::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera*/
+        }
+
+        /* Styling for navigation buttons */
+        .day-button {
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); /* Subtle shadow for depth */
+            border: 1px solid #e2e8f0; /* Light border */
+        }
+        .day-button:hover {
+            background-color: #e0e7ff; /* Light blue on hover */
+            transform: translateY(-1px); /* Slight lift effect */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .day-button.active {
+            background-color: #4f46e5; /* Deep indigo for active state */
+            color: white;
+            font-weight: 600;
+            transform: translateY(-2px); /* More pronounced lift */
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            border-color: #4f46e5;
+        }
+        .part-title {
+            color: #4a5568; /* Darker gray for section titles */
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            padding-left: 1rem;
+            border-bottom: 1px solid #cbd5e0; /* Subtle separator */
+            padding-bottom: 0.5rem;
+            font-size: 1.5rem; /* Larger font for titles */
+        }
+
+        /* Calendar specific styles (now for activity cards) */
+        .activity-cards-container {
+            display: flex; /* Use flexbox for wrapping cards */
+            flex-wrap: wrap; /* Allow cards to wrap to the next line */
+            gap: 1.5rem; /* Increased gap for more white space between cards */
+            justify-content: center; /* Center cards horizontally */
+            align-items: flex-start; /* Align cards to the top */
+        }
+
+        .activity-card {
+            width: calc(33.333% - 1rem); /* Approx 3 cards per row on desktop, adjust as needed */
+            min-width: 280px; /* Minimum width for cards */
+            max-width: 350px; /* Maximum width for cards */
+            padding: 18px 8px; /* More padding */
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem; /* More rounded corners */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background-color: #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08); /* Soft shadow */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 130px; /* Taller cells */
+            border-color: #6366f1; /* Indigo border */
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2); /* More pronounced shadow */
+        }
+        @media (max-width: 768px) {
+            .activity-card {
+                width: calc(50% - 1rem); /* 2 cards per row on tablet */
+            }
+        }
+        @media (max-width: 480px) {
+            .activity-card {
+                width: 100%; /* 1 card per row on mobile */
+            }
+        }
+
+        .activity-card:hover {
+            background-color: #f0f4f8; /* Lighter hover */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        }
+
+        .activity-card .calendar-day-number {
+            font-size: 1.5rem; /* Larger day number */
+            font-weight: bold;
+            color: #1a202c; /* Darker number */
+            margin-bottom: 8px;
+        }
+        .activity-card .calendar-day-activities {
+            font-size: 0.9rem; /* Slightly larger activity text */
+            color: #4a5568;
+            max-height: 50px; /* Increased height for text */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .no-activities-message {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+            font-size: 1.25rem;
+        }
+
+        /* Styles for the toggle and edit buttons */
+        .view-toggle-button, .edit-button {
+            background-color: #4f46e5; /* Deep indigo */
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1.125rem;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: none; /* Ensure no default border */
+            cursor: pointer;
+        }
+        .view-toggle-button:hover, .edit-button:hover {
+            background-color: #4338ca; /* Darker indigo on hover */
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .edit-button { /* Specific override for edit button color */
+            background-color: #10b981; /* Green for edit */
+        }
+        .edit-button:hover {
+            background-color: #059669; /* Darker green */
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <header class="bg-white p-6 shadow-lg rounded-b-3xl">
+        <h1 class="text-5xl font-extrabold text-center tracking-tight text-indigo-700">INTERRAIL 2025</h1>
+        <p class="text-center text-xl mt-2 text-gray-600">Itinerario Detallado</p>
+    </header>
+
+    <main class="flex flex-1 flex-col md:flex-row p-8 gap-8">
+        <!-- Sidebar de navegación -->
+        <aside class="w-full md:w-1/4 bg-white p-6 rounded-3xl shadow-xl scrollable-sidebar border border-neutral-200">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Días del Viaje</h2>
+            <div class="mb-5 flex flex-col gap-3">
+                <button id="toggle-view-button" class="view-toggle-button w-full">Ver Calendario</button>
+                <button id="edit-day-button" class="edit-button w-full">Editar Día</button>
+            </div>
+            <div id="day-navigation" class="flex flex-wrap md:flex-col gap-3">
+                <!-- Los botones de los días se insertarán aquí por JavaScript -->
+            </div>
+        </aside>
+
+        <!-- Contenido principal del itinerario -->
+        <section class="w-full md:w-3/4 bg-white p-8 rounded-3xl shadow-xl border border-neutral-200">
+            <!-- Vista de detalles del día -->
+            <div id="day-view">
+                <h2 class="text-5xl font-extrabold text-gray-900 mb-4" id="day-title">Selecciona un día para ver los detalles</h2>
+                <h3 class="text-3xl font-bold text-indigo-700 mb-8" id="day-location"></h3>
+
+                <div class="space-y-8 text-gray-800">
+                    <div>
+                        <p class="text-xl font-bold text-blue-600 flex items-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M3 12H2m15.325-7.757l.707-.707M5.636 18.364l-.707.707M18.364 5.636l.707-.707M5.636 5.636l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg> Mañana:</p>
+                        <p id="activity-morning" class="ml-10 text-lg text-gray-700 mb-2"></p>
+                        <ul id="morning-details" class="ml-16 text-base list-disc list-inside text-gray-600 space-y-1"></ul>
+                    </div>
+                    <div>
+                        <p class="text-xl font-bold text-blue-600 flex items-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6M6 12l3-3m-3 3l3 3"/></svg> Tarde:</p>
+                        <p id="activity-afternoon" class="ml-10 text-lg text-gray-700 mb-2"></p>
+                        <ul id="afternoon-details" class="ml-16 text-base list-disc list-inside text-gray-600 space-y-1"></ul>
+                    </div>
+                    <div>
+                        <p class="text-xl font-bold text-blue-600 flex items-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 7v5l4 2"/></svg> Noche:</p>
+                        <p id="activity-night" class="ml-10 text-lg text-gray-700 mb-2"></p>
+                        <ul id="night-details" class="ml-16 text-base list-disc list-inside text-gray-600 space-y-1"></ul>
+                    </div>
+                    <div>
+                        <p class="text-xl font-bold text-blue-600 flex items-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/></svg> Dormir:</p>
+                        <p id="day-sleep" class="ml-10 text-lg text-gray-700"></p>
+                    </div>
+                    <div class="mt-10">
+                        <p class="text-xl font-bold text-green-600 flex items-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg> Mis Notas:</p>
+                        <textarea id="personal-notes"
+                            class="w-full p-4 mt-2 border border-neutral-300 rounded-xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-700 text-lg transition-all duration-200"
+                            rows="5" placeholder="Escribe aquí tus notas personales para este día..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de edición del día (inicialmente oculto) -->
+            <div id="edit-day-form" class="hidden mt-8 p-6 bg-blue-50 rounded-xl shadow-inner border border-blue-200">
+                <h3 class="text-3xl font-bold text-blue-800 mb-6">Editar Detalles del Día</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit-title" class="form-label">Título del Día:</label>
+                        <input type="text" id="edit-title" class="form-input">
+                    </div>
+                    <div>
+                        <label for="edit-location" class="form-label">Ubicación:</label>
+                        <input type="text" id="edit-location" class="form-input">
+                    </div>
+                    <div>
+                        <label for="edit-morning-activity" class="form-label">Actividad Mañana:</label>
+                        <input type="text" id="edit-morning-activity" class="form-input">
+                    </div>
+                    <div>
+                        <label for="edit-morning-details" class="form-label">Detalles Mañana (una por línea):</label>
+                        <textarea id="edit-morning-details" class="form-textarea" rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label for="edit-afternoon-activity" class="form-label">Actividad Tarde:</label>
+                        <input type="text" id="edit-afternoon-activity" class="form-input">
+                    </div>
+                    <div>
+                        <label for="edit-afternoon-details" class="form-label">Detalles Tarde (una por línea):</label>
+                        <textarea id="edit-afternoon-details" class="form-textarea" rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label for="edit-night-activity" class="form-label">Actividad Noche:</label>
+                        <input type="text" id="edit-night-activity" class="form-input">
+                    </div>
+                    <div>
+                        <label for="edit-night-details" class="form-label">Detalles Noche (una por línea):</label>
+                        <textarea id="edit-night-details" class="form-textarea" rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label for="edit-sleep" class="form-label">Dormir:</label>
+                        <input type="text" id="edit-sleep" class="form-input">
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end gap-4">
+                    <button id="save-day-button" class="save-button">Guardar Cambios</button>
+                    <button id="cancel-edit-button" class="cancel-button">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Vista de calendario (inicialmente oculta) -->
+            <div id="calendar-view" class="hidden">
+                <h2 class="text-4xl font-extrabold text-gray-900 mb-8 text-center">Calendario del Itinerario</h2>
+                <div class="flex justify-center items-center mb-6">
+                    <h3 id="current-month-year" class="text-3xl font-bold text-gray-800"></h3>
+                </div>
+                <div id="activity-cards-container" class="flex flex-wrap justify-center gap-4 p-4">
+                    <!-- Las tarjetas de actividad se insertarán aquí por JavaScript -->
+                </div>
+                <p id="no-activities-message" class="no-activities-message hidden">No hay actividades programadas para este mes.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 text-white p-6 text-center text-lg mt-8 rounded-t-3xl shadow-inner">
+        <p>&copy; 2025 Interrail. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // Datos del itinerario con detalles de actividades
+        // Cargar itinerario desde localStorage o usar el predefinido
+        let itinerary = JSON.parse(localStorage.getItem('itineraryData')) || [
+            {
+                day: "Día 1", date: "Mié, 16 jul", title: "Llegada a Milán", location: "Milán",
+                coordinates: [45.4642, 9.1900], // Milán
+                activities: {
+                    morning: "Llegada 12:25 PM a Milán.",
+                    afternoon: "Duomo, terrazas y Galería Vittorio Emanuele II.",
+                    night: "Navigli (canales)."
+                },
+                details: {
+                    morning: [],
+                    afternoon: ["Visita al impresionante Duomo de Milán y subida a sus terrazas para vistas panorámicas.", "Paseo y compras en la lujosa Galería Vittorio Emanuele II."],
+                    night: ["Cena y ambiente nocturno en la zona de los canales de Navigli."]
+                },
+                sleep: "Milán (1/3)", part: "Parte 1: Italia y Alsacia",
+                route: null,
+                startDate: new Date(2025, 6, 16) // Mes 6 = Julio
+            },
+            {
+                day: "Día 2", date: "Jue, 17 jul", title: "Milán → Estrasburgo", location: "Estrasburgo",
+                coordinates: [48.5833, 7.7500], // Estrasburgo
+                activities: {
+                    morning: "Tren Milán → Estrasburgo (≈ 8 h, vía Suiza).",
+                    afternoon: "Petite France; cena alsaciana.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Viaje en tren desde Milán a Estrasburgo, un trayecto panorámico a través de Suiza."],
+                    afternoon: ["Exploración del encantador barrio de la Petite France.", "Disfrutar de una auténtica cena alsaciana."],
+                    night: []
+                },
+                sleep: "Estrasburgo (2/3)", part: "Parte 1: Italia y Alsacia",
+                route: { from: [45.4642, 9.1900], to: [48.5833, 7.7500], description: "Tren Milán → Estrasburgo" },
+                startDate: new Date(2025, 6, 17)
+            },
+            {
+                day: "Día 3", date: "Vie, 18 jul", title: "Día completo en Estrasburgo", location: "Estrasburgo",
+                coordinates: [48.5833, 7.7500], // Estrasburgo
+                activities: {
+                    morning: "Catedral, paseo en barco.",
+                    afternoon: "Parlamento Europeo.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Visita a la impresionante Catedral de Estrasburgo.", "Paseo en barco por los canales de la ciudad."],
+                    afternoon: ["Visita al Parlamento Europeo (si es posible y de interés)."],
+                    night: []
+                },
+                sleep: "Estrasburgo (3/3)", part: "Parte 1: Italia y Alsacia",
+                route: null,
+                startDate: new Date(2025, 6, 18)
+            },
+            {
+                day: "Día 4", date: "Sáb, 19 jul", title: "Excursión a Colmar", location: "Estrasburgo",
+                coordinates: [48.0792, 7.3584], // Colmar (para la excursión)
+                activities: {
+                    morning: "Excursión a Colmar (30 min en tren).",
+                    afternoon: "Regreso a Estrasburgo.",
+                    night: "Noche en Estrasburgo."
+                },
+                details: {
+                    morning: ["Viaje en tren a Colmar, conocida por su centro histórico bien conservado."],
+                    afternoon: ["Tiempo libre para explorar Colmar.", "Regreso a Estrasburgo."],
+                    night: ["Noche libre en Estrasburgo."]
+                },
+                sleep: "Estrasburgo", part: "Parte 1: Italia y Alsacia",
+                route: { from: [48.5833, 7.7500], to: [48.0792, 7.3584], description: "Tren Estrasburgo → Colmar" },
+                startDate: new Date(2025, 6, 19)
+            },
+            {
+                day: "Día 5", date: "Dom, 20 jul", title: "Estrasburgo → Bruselas", location: "Bruselas",
+                coordinates: [50.8503, 4.3517], // Bruselas
+                activities: {
+                    morning: "Tren Estrasburgo → Bruselas (≈ 3½ h).",
+                    afternoon: "Grand-Place, Manneken Pis, moules-frites.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Viaje en tren desde Estrasburgo a Bruselas."],
+                    afternoon: ["Visita a la icónica Grand-Place.", "Ver el Manneken Pis.", "Disfrutar de las famosas moules-frites."],
+                    night: []
+                },
+                sleep: "Bruselas (1/3)", part: "Parte 2: Bélgica y reunión",
+                route: { from: [48.5833, 7.7500], to: [50.8503, 4.3517], description: "Tren Estrasburgo → Bruselas" },
+                startDate: new Date(2025, 6, 20)
+            },
+            {
+                day: "Día 6", date: "Lun, 21 jul", title: "Bruselas (Brujas y Gante)", location: "Bruselas",
+                coordinates: [50.8503, 4.3517], // Bruselas
+                activities: {
+                    morning: "Recogida en Zaventem (10:00 h).",
+                    afternoon: "Mediodía: tren a Brujas (1 h) – Markt, Grote Kerk. Tarde: Gante (30 min) – Graslei, Castillo.",
+                    night: "Regreso a Bruselas."
+                },
+                details: {
+                    morning: ["Recogida en el aeropuerto de Zaventem a las 10:00 h."],
+                    afternoon: ["Viaje en tren a Brujas para visitar el Markt y la Grote Kerk.", "Continuación en tren a Gante para explorar Graslei y el Castillo de los Condes de Flandes."],
+                    night: ["Regreso a Bruselas para pasar la noche."]
+                },
+                sleep: "Bruselas (2/3)", part: "Parte 2: Bélgica y reunión",
+                route: { from: [50.8503, 4.3517], to: [51.2093, 3.2247], description: "Tren Bruselas → Brujas y Gante" }, // Ruta aproximada
+                startDate: new Date(2025, 6, 21)
+            },
+            {
+                day: "Día 7", date: "Mar, 22 jul", title: "Bruselas → Ámsterdam", location: "Ámsterdam",
+                coordinates: [52.3676, 4.9041], // Ámsterdam
+                activities: {
+                    morning: "Thalys Bruselas → Ámsterdam (≈ 2 h).",
+                    afternoon: "Canales, Jordaan, De Pijp.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Viaje en tren Thalys de Bruselas a Ámsterdam."],
+                    afternoon: ["Paseo por los famosos canales de Ámsterdam.", "Exploración de los barrios de Jordaan y De Pijp."],
+                    night: []
+                },
+                sleep: "Ámsterdam (1/2)", part: "Parte 2: Bélgica y reunión",
+                route: { from: [50.8503, 4.3517], to: [52.3676, 4.9041], description: "Thalys Bruselas → Ámsterdam" },
+                startDate: new Date(2025, 6, 22)
+            },
+            {
+                day: "Día 8", date: "Mié, 23 jul", title: "Día completo en Ámsterdam", location: "Ámsterdam",
+                coordinates: [52.3676, 4.9041], // Ámsterdam
+                activities: {
+                    morning: "Van Gogh/Rijksmuseum.",
+                    afternoon: "Vondelpark, paseo en barco.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Visita al Museo Van Gogh o al Rijksmuseum (o ambos, si el tiempo lo permite)."],
+                    afternoon: ["Relajación en Vondelpark.", "Paseo en barco por los canales."],
+                    night: []
+                },
+                sleep: "Ámsterdam (2/2)", part: "Parte 3: Países Bajos, Alemania y Europa del Este",
+                route: null,
+                startDate: new Date(2025, 6, 23)
+            },
+            {
+                day: "Día 9", date: "Jue, 24 jul", title: "Ámsterdam → Berlín", location: "Berlín",
+                coordinates: [52.5200, 13.4050], // Berlín
+                activities: {
+                    morning: "Tren diurno Ámsterdam → Berlín (cambio en Hannover, salida 08:00, llegada 16:30).",
+                    afternoon: "",
+                    night: "Alexanderplatz y Nikolaiviertel."
+                },
+                details: {
+                    morning: ["Viaje en tren diurno desde Ámsterdam a Berlín, con cambio en Hannover."],
+                    afternoon: [],
+                    night: ["Exploración de Alexanderplatz y el histórico Nikolaiviertel."]
+                },
+                sleep: "Berlín (1/3)", part: "Parte 3: Países Bajos, Alemania y Europa del Este",
+                route: { from: [52.3676, 4.9041], to: [52.5200, 13.4050], description: "Tren Ámsterdam → Berlín" },
+                startDate: new Date(2025, 6, 24)
+            },
+            {
+                day: "Día 10", date: "Vie, 25 jul", title: "Día completo en Berlín", location: "Berlín",
+                coordinates: [52.5200, 13.4050], // Berlín
+                activities: {
+                    morning: "Brandeburgo, Reichstag.",
+                    afternoon: "Memorial del Holocausto.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Visita a la Puerta de Brandeburgo y el Reichstag.", "Exploración del Memorial del Holocausto."],
+                    afternoon: [],
+                    night: []
+                },
+                sleep: "Berlín (2/3)", part: "Parte 3: Países Bajos, Alemania y Europa del Este",
+                route: null,
+                startDate: new Date(2025, 6, 25)
+            },
+            {
+                day: "Día 11", date: "Sáb, 26 jul", title: "Día completo en Berlín", location: "Berlín",
+                coordinates: [52.5200, 13.4050], // Berlín
+                activities: {
+                    morning: "East Side Gallery, Checkpoint Charlie.",
+                    afternoon: "Isla de los Museos.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Paseo por la East Side Gallery.", "Visita a Checkpoint Charlie."],
+                    afternoon: ["Exploración de la Isla de los Museos."],
+                    night: []
+                },
+                sleep: "Berlín (3/3)", part: "Parte 3: Países Bajos, Alemania y Europa del Este",
+                route: null,
+                startDate: new Date(2025, 6, 26)
+            },
+            {
+                day: "Día 12", date: "Dom, 27 jul", title: "Berlín → Praga", location: "Praga",
+                coordinates: [50.0755, 14.4378], // Praga
+                activities: {
+                    morning: "Tren Berlín → Praga (11:16 AM–15:24 PM).",
+                    afternoon: "Ciudad Vieja y Reloj Astronómico.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Viaje en tren desde Berlín a Praga."],
+                    afternoon: ["Paseo por la Ciudad Vieja y admirar el Reloj Astronómico."],
+                    night: []
+                },
+                sleep: "Praga (1/2)", part: "Parte 3: Países Bajos, Alemania y Europa del Este",
+                route: { from: [52.5200, 13.4050], to: [50.0755, 14.4378], description: "Tren Berlín → Praga" },
+                startDate: new Date(2025, 6, 27)
+            },
+            {
+                day: "Día 13", date: "Lun, 28 jul", title: "Día completo en Praga", location: "Praga",
+                coordinates: [50.0755, 14.4378], // Praga
+                activities: {
+                    morning: "Castillo, Puente de Carlos.",
+                    afternoon: "Malá Strana.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Visita al Castillo de Praga.", "Paseo por el famoso Puente de Carlos."],
+                    afternoon: ["Exploración del barrio de Malá Strana."],
+                    night: []
+                },
+                sleep: "Praga (2/2)", part: "Parte 3: Países Bajos, Alemania y Europa del Este",
+                route: null,
+                startDate: new Date(2025, 6, 28)
+            },
+            {
+                day: "Día 14", date: "Mar, 29 jul", title: "Praga → Budapest", location: "Budapest",
+                coordinates: [47.4979, 19.0402], // Budapest
+                activities: {
+                    morning: "Tren Praga → Budapest (10:44 AM–18:49 PM).",
+                    afternoon: "",
+                    night: "Bastión de los Pescadores."
+                },
+                details: {
+                    morning: ["Viaje en tren desde Praga a Budapest."],
+                    afternoon: [],
+                    night: ["Visita nocturna al Bastión de los Pescadores."]
+                },
+                sleep: "Budapest (1/2)", part: "Parte 3: Países Bajos, Alemania y Europa del Este",
+                route: { from: [50.0755, 14.4378], to: [47.4979, 19.0402], description: "Tren Praga → Budapest" },
+                startDate: new Date(2025, 6, 29)
+            },
+            {
+                day: "Día 15", date: "Mié, 30 jul", title: "Día completo en Budapest", location: "Budapest",
+                coordinates: [47.4979, 19.0402], // Budapest
+                activities: {
+                    morning: "Parlamento, baños Széchenyi.",
+                    afternoon: "Ruin bars.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Visita al Parlamento de Budapest.", "Relajación en los baños termales Széchenyi."],
+                    afternoon: ["Exploración de los famosos 'ruin bars' de Budapest."],
+                    night: []
+                },
+                sleep: "Budapest (2/2)", part: "Parte 3: Países Bajos, Alemania y Europa del Este",
+                route: null,
+                startDate: new Date(2025, 6, 30)
+            },
+            {
+                day: "Día 16", date: "Jue, 31 jul", title: "Día de regreso", location: "Aeropuerto",
+                coordinates: [47.4369, 19.2555], // Aeropuerto de Budapest (aproximado)
+                activities: {
+                    morning: "Mañana libre según hora de tu vuelo.",
+                    afternoon: "Traslado al aeropuerto y vuelo de regreso.",
+                    night: ""
+                },
+                details: {
+                    morning: ["Tiempo libre para últimas compras o visitas según la hora de tu vuelo."],
+                    afternoon: ["Traslado al aeropuerto.", "Vuelo de regreso."]
+                },
+                sleep: "Vuelo de regreso", part: "Parte 3: Países Bajos, Alemania y Europa del Este",
+                route: null,
+                startDate: new Date(2025, 6, 31)
+            }
+        ];
+
+        // Referencias a elementos del DOM
+        const dayNavigation = document.getElementById('day-navigation');
+        const dayTitle = document.getElementById('day-title');
+        const dayLocation = document.getElementById('day-location');
+        const activityMorning = document.getElementById('activity-morning');
+        const activityAfternoon = document.getElementById('activity-afternoon');
+        const activityNight = document.getElementById('activity-night');
+        const daySleep = document.getElementById('day-sleep');
+        const morningDetails = document.getElementById('morning-details');
+        const afternoonDetails = document.getElementById('afternoon-details');
+        const nightDetails = document.getElementById('night-details');
+        const personalNotes = document.getElementById('personal-notes');
+        const toggleViewButton = document.getElementById('toggle-view-button');
+        const editDayButton = document.getElementById('edit-day-button');
+        const dayView = document.getElementById('day-view');
+        const calendarView = document.getElementById('calendar-view');
+        const activityCardsContainer = document.getElementById('activity-cards-container'); // Renamed from calendarGrid
+        const noActivitiesMessage = document.getElementById('no-activities-message');
+        const currentMonthYear = document.getElementById('current-month-year');
+        // Removed prevMonthButton and nextMonthButton as per request
+
+        // Edit form elements
+        const editDayForm = document.getElementById('edit-day-form');
+        const editTitle = document.getElementById('edit-title');
+        const editLocation = document.getElementById('edit-location');
+        const editMorningActivity = document.getElementById('edit-morning-activity');
+        const editMorningDetails = document.getElementById('edit-morning-details');
+        const editAfternoonActivity = document.getElementById('edit-afternoon-activity');
+        const editAfternoonDetails = document.getElementById('edit-afternoon-details');
+        const editNightActivity = document.getElementById('edit-night-activity');
+        const editNightDetails = document.getElementById('edit-night-details');
+        const editSleep = document.getElementById('edit-sleep');
+        const saveDayButton = document.getElementById('save-day-button');
+        const cancelEditButton = document.getElementById('cancel-edit-button');
+
+        let currentActiveButton = null;
+        let currentView = 'day'; // 'day' or 'calendar'
+        let currentCalendarDate = new Date(2025, 6, 1); // Start in July 2025
+        let currentDayIndex = 0; // Track the currently displayed day for editing
+
+        // Function to save itinerary data to localStorage
+        function saveItineraryToLocalStorage() {
+            localStorage.setItem('itineraryData', JSON.stringify(itinerary));
+        }
+
+        // Function to display details for a specific day
+        function showDayDetails(dayIndex) {
+            currentDayIndex = dayIndex; // Update current day index
+            const dayData = itinerary[dayIndex];
+
+            // Hide edit form if visible
+            editDayForm.classList.add('hidden');
+            dayView.classList.remove('hidden');
+
+            // Update main content
+            dayTitle.textContent = `${dayData.day} • ${dayData.date} - ${dayData.title}`;
+            dayLocation.textContent = dayData.location;
+            activityMorning.textContent = dayData.activities.morning || 'No hay actividades programadas.';
+            activityAfternoon.textContent = dayData.activities.afternoon || 'No hay actividades programadas.';
+            activityNight.textContent = dayData.activities.night || 'No hay actividades programadas.';
+            daySleep.textContent = dayData.sleep;
+
+            // Clear and add additional details
+            morningDetails.innerHTML = '';
+            dayData.details.morning.forEach(detail => {
+                const li = document.createElement('li');
+                li.textContent = detail;
+                morningDetails.appendChild(li);
+            });
+
+            afternoonDetails.innerHTML = '';
+            dayData.details.afternoon.forEach(detail => {
+                const li = document.createElement('li');
+                li.textContent = detail;
+                afternoonDetails.appendChild(li);
+            });
+
+            nightDetails.innerHTML = '';
+            dayData.details.night.forEach(detail => {
+                const li = document.createElement('li');
+                li.textContent = detail;
+                nightDetails.appendChild(li);
+            });
+
+            // Load personal notes
+            const savedNotes = localStorage.getItem(`notes-day-${dayIndex}`);
+            personalNotes.value = savedNotes || '';
+            personalNotes.oninput = () => {
+                localStorage.setItem(`notes-day-${dayIndex}`, personalNotes.value);
+            };
+
+            // Update active button in navigation
+            if (currentActiveButton) {
+                currentActiveButton.classList.remove('active');
+            }
+            const newActiveButton = dayNavigation.querySelector(`button[data-day-index="${dayIndex}"]`);
+            if (newActiveButton) {
+                newActiveButton.classList.add('active');
+                currentActiveButton = newActiveButton;
+            }
+
+            // Ensure day view is visible
+            dayView.classList.remove('hidden');
+            calendarView.classList.add('hidden');
+            toggleViewButton.textContent = 'Ver Calendario';
+            currentView = 'day';
+        }
+
+        // Render navigation buttons and group them by "Parts"
+        function renderNavigation() {
+            dayNavigation.innerHTML = ''; // Clear existing navigation
+            let currentPart = "";
+            itinerary.forEach((day, index) => {
+                if (day.part !== currentPart) {
+                    currentPart = day.part;
+                    const partTitle = document.createElement('h3');
+                    partTitle.textContent = currentPart;
+                    partTitle.classList.add('part-title');
+                    dayNavigation.appendChild(partTitle);
+                }
+
+                const button = document.createElement('button');
+                button.textContent = `${day.day} - ${day.location}`;
+                button.classList.add(
+                    'day-button',
+                    'w-full',
+                    'md:w-auto', /* On larger screens, auto width so they don't stretch */
+                    'text-left',
+                    'px-5', /* More padding */
+                    'py-3', /* More padding */
+                    'rounded-xl', /* More rounded corners */
+                    'hover:bg-blue-100',
+                    'focus:outline-none',
+                    'focus:ring-2',
+                    'focus:ring-blue-500',
+                    'focus:ring-opacity-50',
+                    'transition-colors',
+                    'duration-200',
+                    'ease-in-out',
+                    'text-lg', /* Larger font */
+                    'text-gray-700'
+                );
+                button.setAttribute('data-day-index', index);
+                button.addEventListener('click', () => showDayDetails(index));
+                dayNavigation.appendChild(button);
+            });
+        }
+
+        // Function to render the calendar as activity cards
+        function renderCalendar(date) {
+            activityCardsContainer.innerHTML = ''; // Clear existing cards
+            noActivitiesMessage.classList.add('hidden'); // Hide message by default
+
+            const year = date.getFullYear();
+            const month = date.getMonth(); // 0-indexed
+
+            currentMonthYear.textContent = `${new Date(year, month).toLocaleString('es-ES', { month: 'long', year: 'numeric' })}`;
+
+            // Filter itinerary to get only activities for the current month
+            const activitiesInMonth = itinerary.filter(item => {
+                return item.startDate.getFullYear() === year &&
+                       item.startDate.getMonth() === month;
+            });
+
+            if (activitiesInMonth.length === 0) {
+                noActivitiesMessage.classList.remove('hidden');
+                return; // No activities, just show the message
+            }
+
+            // Sort activities by date to ensure correct order
+            activitiesInMonth.sort((a, b) => a.startDate - b.startDate);
+
+            activitiesInMonth.forEach(dayData => {
+                const cardDiv = document.createElement('div');
+                cardDiv.classList.add('activity-card'); // Apply the new card style
+
+                let cityText = dayData.location; // Default to location
+                if (dayData.route && dayData.route.description) {
+                    cityText = dayData.route.description;
+                }
+
+                cardDiv.innerHTML = `
+                    <div class="calendar-day-number">${dayData.startDate.getDate()}</div>
+                    <div class="text-sm text-gray-500 mb-2">${dayData.date}</div>
+                    <div class="text-base font-semibold text-gray-800">${dayData.title}</div>
+                    <div class="calendar-day-activities">${cityText}</div>
+                `;
+
+                cardDiv.addEventListener('click', () => {
+                    const dayIndex = itinerary.indexOf(dayData);
+                    showDayDetails(dayIndex);
+                });
+                activityCardsContainer.appendChild(cardDiv);
+            });
+        }
+
+        // Removed event handlers for changing month as per request
+
+        // Toggle between day and calendar view
+        toggleViewButton.addEventListener('click', () => {
+            if (currentView === 'day') {
+                dayView.classList.add('hidden');
+                editDayForm.classList.add('hidden'); // Hide edit form when going to calendar
+                calendarView.classList.remove('hidden');
+                toggleViewButton.textContent = 'Ver Día';
+                currentView = 'calendar';
+                renderCalendar(currentCalendarDate); // Render the calendar when switching
+            } else {
+                dayView.classList.remove('hidden');
+                calendarView.classList.add('hidden');
+                toggleViewButton.textContent = 'Ver Calendario';
+                currentView = 'day';
+            }
+        });
+
+        // Event listener for "Editar Día" button
+        editDayButton.addEventListener('click', () => {
+            const dayData = itinerary[currentDayIndex];
+            dayView.classList.add('hidden');
+            calendarView.classList.add('hidden');
+            editDayForm.classList.remove('hidden');
+
+            // Populate form fields with current day's data
+            editTitle.value = dayData.title;
+            editLocation.value = dayData.location;
+            editMorningActivity.value = dayData.activities.morning;
+            editMorningDetails.value = dayData.details.morning.join('\n');
+            editAfternoonActivity.value = dayData.activities.afternoon;
+            editAfternoonDetails.value = dayData.details.afternoon.join('\n');
+            editNightActivity.value = dayData.activities.night;
+            editNightDetails.value = dayData.details.night.join('\n');
+            editSleep.value = dayData.sleep;
+        });
+
+        // Event listener for "Guardar Cambios" button
+        saveDayButton.addEventListener('click', () => {
+            const dayData = itinerary[currentDayIndex];
+
+            // Update day data from form fields
+            dayData.title = editTitle.value;
+            dayData.location = editLocation.value;
+            dayData.activities.morning = editMorningActivity.value;
+            dayData.details.morning = editMorningDetails.value.split('\n').filter(line => line.trim() !== '');
+            dayData.activities.afternoon = editAfternoonActivity.value;
+            dayData.details.afternoon = editAfternoonDetails.value.split('\n').filter(line => line.trim() !== '');
+            dayData.activities.night = editNightActivity.value;
+            dayData.details.night = editNightDetails.value.split('\n').filter(line => line.trim() !== '');
+            dayData.sleep = editSleep.value;
+
+            // Save updated itinerary to localStorage
+            saveItineraryToLocalStorage();
+
+            // Re-render the current day's details and hide the form
+            showDayDetails(currentDayIndex);
+            renderNavigation(); // Re-render navigation to update any location changes
+        });
+
+        // Event listener for "Cancelar" button
+        cancelEditButton.addEventListener('click', () => {
+            // Simply hide the form and show the day view
+            showDayDetails(currentDayIndex); // This will re-render with original data
+        });
+
+        // Service Worker registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado con éxito:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Fallo el registro del Service Worker:', error);
+                    });
+            });
+        }
+
+        // Initialize the application on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Parse startDate strings to Date objects if loaded from localStorage
+            itinerary.forEach(day => {
+                if (typeof day.startDate === 'string') {
+                    day.startDate = new Date(day.startDate);
+                }
+            });
+
+            renderNavigation();
+            // Show details of the first day by default
+            showDayDetails(0);
+        });
+    </script>
+    <!-- Service Worker and Manifest for PWA -->
+    <script>
+        // This script is for Canvas demonstration only.
+        // In a production environment, service-worker.js and manifest.json
+        // should be separate files in the root directory.
+
+        // Manifest.json simulation
+        const manifestContent = {
+            "name": "Interrail 2025",
+            "short_name": "Interrail",
+            "description": "Itinerario interactivo de tu viaje Interrail 2025.",
+            "start_url": "./",
+            "display": "standalone",
+            "background_color": "#f8fafc",
+            "theme_color": "#4f46e5",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/4f46e5/ffffff?text=IR",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/4f46e5/ffffff?text=IR",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+
+        const blob = new Blob([JSON.stringify(manifestContent)], { type: 'application/json' });
+        const manifestUrl = URL.createObjectURL(blob);
+        document.querySelector('link[rel="manifest"]').setAttribute('href', manifestUrl);
+
+        // Service-worker.js simulation
+        const serviceWorkerContent = `
+            const CACHE_NAME = 'itinerary-cache-v1';
+            const urlsToCache = [
+                './',
+                './index.html',
+                'https://cdn.tailwindcss.com'
+            ];
+
+            self.addEventListener('install', event => {
+                event.waitUntil(
+                    caches.open(CACHE_NAME)
+                        .then(cache => {
+                            console.log('Cache opened');
+                            return cache.addAll(urlsToCache);
+                        })
+                );
+            });
+
+            self.addEventListener('fetch', event => {
+                event.respondWith(
+                    caches.match(event.request)
+                        .then(response => {
+                            if (response) {
+                                return response;
+                            }
+                            return fetch(event.request).then(
+                                function(response) {
+                                    if(!response || response.status !== 200 || response.type !== 'basic') {
+                                        return response;
+                                    }
+                                    var responseToCache = response.clone();
+                                    caches.open(CACHE_NAME)
+                                        .then(function(cache) {
+                                            cache.put(event.request, responseToCache);
+                                        });
+                                    return response;
+                                }
+                            );
+                        })
+                );
+            });
+
+            self.addEventListener('activate', event => {
+                const cacheWhitelist = [CACHE_NAME];
+                event.waitUntil(
+                    caches.keys().then(cacheNames => {
+                        return Promise.all(
+                            cacheNames.map(cacheName => {
+                                if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                    return caches.delete(cacheName);
+                                }
+                            })
+                        );
+                    })
+                );
+            });
+        `;
+
+        const swBlob = new Blob([serviceWorkerContent], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+
+        // Re-register service worker with the Blob URL
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register(swUrl)
+                    .then(registration => {
+                        console.log('Service Worker registered successfully (Blob URL):', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed (Blob URL):', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
