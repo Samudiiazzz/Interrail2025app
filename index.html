@@ -31,17 +31,45 @@
         }
         .activity-card {
             background: #23232a !important;
-            border-color: #6366f1 !important;
-            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.15) !important;
+            border: 2px solid #6366f1 !important;
+            color: #f3f4f6 !important;
+            box-shadow: 0 4px 24px 0 rgba(99,102,241,0.10) !important;
+            border-radius: 1.2rem !important;
+            padding: 1.5rem 1.2rem !important;
+            margin-bottom: 1.2rem !important;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 0;
+            transition: background 0.2s, border 0.2s, color 0.2s, box-shadow 0.2s;
         }
-        .activity-card:hover {
-            background: #27272a !important;
+        .activity-card:hover, .activity-card:focus {
+            background: #353569 !important;
+            border-color: #facc15 !important;
+            color: #fff !important;
+            box-shadow: 0 8px 32px 0 rgba(250,204,21,0.10) !important;
         }
-        .calendar-day-number {
+        .activity-card .calendar-day-number {
+            font-size: 2.1rem !important;
+            font-weight: bold;
             color: #facc15 !important;
+            margin-bottom: 0.2rem;
         }
-        .calendar-day-activities {
+        .activity-card .text-sm {
             color: #a5b4fc !important;
+            font-size: 1.1rem !important;
+            margin-bottom: 0.2rem;
+        }
+        .activity-card .text-base {
+            color: #fff !important;
+            font-size: 1.15rem !important;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+        .activity-card .calendar-day-activities {
+            color: #a5b4fc !important;
+            font-size: 1rem !important;
+            margin-bottom: 0.1rem;
         }
         .no-activities-message {
             color: #a1a1aa !important;
@@ -132,6 +160,10 @@
             .scrollable-sidebar {
                 max-height: none !important;
             }
+            .activity-card {
+                border-radius: 1rem !important;
+                padding: 1.2rem 0.7rem !important;
+            }
         }
         @media (max-width: 768px) {
             main {
@@ -149,8 +181,9 @@
                 min-width: 100vw !important;
                 max-width: 100vw !important;
                 width: 100vw !important;
-                margin: 0 !important;
                 border-radius: 0 !important;
+                margin: 0 0 1rem 0 !important;
+                padding: 1.1rem 0.5rem !important;
                 box-shadow: none !important;
             }
             .activity-cards-container {
@@ -218,9 +251,7 @@
         }
         @media (max-width: 480px) {
             .activity-card {
-                min-width: 98vw !important;
-                max-width: 100vw !important;
-                padding: 0.5rem 0.2rem !important;
+                padding: 0.7rem 0.1rem !important;
             }
             .scrollable-sidebar, aside, section {
                 padding: 0.5rem !important;
