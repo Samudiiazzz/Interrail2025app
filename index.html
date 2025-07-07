@@ -146,15 +146,20 @@
                 border-radius: 1rem !important;
             }
             .activity-card {
-                min-width: 90vw !important;
-                max-width: 98vw !important;
-                width: 100% !important;
-                margin: 0 auto 1rem auto !important;
-                padding: 1rem 0.5rem !important;
+                min-width: 100vw !important;
+                max-width: 100vw !important;
+                width: 100vw !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
             }
             .activity-cards-container {
-                gap: 0.5rem !important;
-                padding: 0.5rem !important;
+                padding: 0 !important;
+                gap: 0 !important;
+            }
+            .sidebar-buttons-mobile-hidden,
+            #day-navigation {
+                display: none !important;
             }
         }
         @media (max-width: 480px) {
@@ -200,11 +205,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
             <button id="mobile-toggle-view-button" class="view-toggle-button w-full mb-4" tabindex="0">Ver Calendario</button>
-            <button id="mobile-edit-day-button" class="edit-button w-full" tabindex="0">Editar Día</button>
+            <button id="mobile-edit-day-button" class="edit-button w-full mb-6" tabindex="0">Editar Día</button>
+            <div id="mobile-day-navigation" class="flex flex-col gap-2"></div>
         </nav>
         <!-- Sidebar de navegación -->
         <aside class="w-full md:w-1/4 bg-white p-6 rounded-3xl shadow-xl scrollable-sidebar border border-neutral-200">
-            <h2 class="text-3xl font-bold mb-6 text-gray-800">Días del Viaje</h2>
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 sidebar-buttons-mobile-hidden">Días del Viaje</h2>
             <div class="mb-5 flex flex-col gap-3 sidebar-buttons-mobile-hidden">
                 <button id="toggle-view-button" class="view-toggle-button w-full" aria-label="Ver Calendario" tabindex="0">Ver Calendario</button>
                 <button id="edit-day-button" class="edit-button w-full" aria-label="Editar Día" tabindex="0">Editar Día</button>
@@ -700,9 +706,11 @@
             currentView = 'day';
         }
 
-        // Render navigation buttons and group them by "Parts"
+        // Render navigation buttons y también para menú móvil
         function renderNavigation() {
-            dayNavigation.innerHTML = ''; // Clear existing navigation
+            dayNavigation.innerHTML = ''; // Navegación lateral (solo desktop/tablet)
+            const mobileDayNav = document.getElementById('mobile-day-navigation');
+            if (mobileDayNav) mobileDayNav.innerHTML = '';
             let currentPart = "";
             itinerary.forEach((day, index) => {
                 if (day.part !== currentPart) {
@@ -710,19 +718,27 @@
                     const partTitle = document.createElement('h3');
                     partTitle.textContent = currentPart;
                     partTitle.classList.add('part-title');
+                    // Solo añadir en desktop
                     dayNavigation.appendChild(partTitle);
+                    // En móvil, también añadir título de parte
+                    if (mobileDayNav) {
+                        const mobilePartTitle = document.createElement('h3');
+                        mobilePartTitle.textContent = currentPart;
+                        mobilePartTitle.classList.add('part-title');
+                        mobileDayNav.appendChild(mobilePartTitle);
+                    }
                 }
-
+                // Botón de día para desktop
                 const button = document.createElement('button');
                 button.textContent = `${day.day} - ${day.location}`;
                 button.classList.add(
                     'day-button',
                     'w-full',
-                    'md:w-auto', /* On larger screens, auto width so they don't stretch */
+                    'md:w-auto',
                     'text-left',
-                    'px-5', /* More padding */
-                    'py-3', /* More padding */
-                    'rounded-xl', /* More rounded corners */
+                    'px-5',
+                    'py-3',
+                    'rounded-xl',
                     'hover:bg-blue-100',
                     'focus:outline-none',
                     'focus:ring-2',
@@ -731,12 +747,21 @@
                     'transition-colors',
                     'duration-200',
                     'ease-in-out',
-                    'text-lg', /* Larger font */
+                    'text-lg',
                     'text-gray-700'
                 );
                 button.setAttribute('data-day-index', index);
                 button.addEventListener('click', () => showDayDetails(index));
                 dayNavigation.appendChild(button);
+                // Botón de día para menú móvil
+                if (mobileDayNav) {
+                    const mobileButton = button.cloneNode(true);
+                    mobileButton.addEventListener('click', () => {
+                        showDayDetails(index);
+                        closeMobileMenuFunc();
+                    });
+                    mobileDayNav.appendChild(mobileButton);
+                }
             });
         }
 
