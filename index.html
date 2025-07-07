@@ -238,6 +238,55 @@
             color: #a5b4fc !important;
         }
         /* --- FIN ARREGLO DE COLORES --- */
+        /* Botones de acción destacados */
+        .view-toggle-button, .edit-button {
+            font-size: 1.15rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.02em;
+            padding: 1.1rem 2rem !important;
+            border-radius: 1rem !important;
+            box-shadow: 0 6px 24px 0 rgba(99,102,241,0.18) !important;
+            border: 2px solid #6366f1 !important;
+            background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%) !important;
+            color: #fff !important;
+            transition: background 0.2s, box-shadow 0.2s, border 0.2s, color 0.2s;
+        }
+        .view-toggle-button:hover, .edit-button:hover {
+            background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%) !important;
+            color: #facc15 !important;
+            border-color: #facc15 !important;
+            box-shadow: 0 8px 32px 0 rgba(250,204,21,0.18) !important;
+        }
+        .edit-button {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%) !important;
+            border-color: #10b981 !important;
+        }
+        .edit-button:hover {
+            background: linear-gradient(90deg, #34d399 0%, #10b981 100%) !important;
+            color: #fff !important;
+            border-color: #facc15 !important;
+        }
+        /* Contraste para los botones de los días */
+        .day-button {
+            background: #23232a !important;
+            color: #f3f4f6 !important;
+            border: 2px solid #6366f1 !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 8px 0 rgba(99,102,241,0.10) !important;
+            transition: background 0.2s, color 0.2s, border 0.2s, box-shadow 0.2s;
+        }
+        .day-button:hover, .day-button:focus {
+            background: #6366f1 !important;
+            color: #fff !important;
+            border-color: #facc15 !important;
+            box-shadow: 0 4px 16px 0 rgba(250,204,21,0.15) !important;
+        }
+        .day-button.active {
+            background: #facc15 !important;
+            color: #23232a !important;
+            border-color: #facc15 !important;
+            box-shadow: 0 6px 24px 0 rgba(250,204,21,0.18) !important;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
