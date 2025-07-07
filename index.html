@@ -9,6 +9,116 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* --- TEMA OSCURO GLOBAL --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #18181b;
+            color: #f3f4f6;
+        }
+        header, footer, .bg-white, .scrollable-sidebar, .activity-card, .mobile-menu {
+            background-color: #23232a !important;
+            color: #f3f4f6 !important;
+        }
+        .rounded-3xl, .rounded-b-3xl, .rounded-t-3xl, .rounded-xl, .rounded-xl, .rounded-xl, .rounded-xl {
+            border-radius: 1.5rem !important;
+        }
+        .border, .border-neutral-200, .border-blue-200, .border-neutral-300 {
+            border-color: #27272a !important;
+        }
+        .shadow-xl, .shadow-lg, .shadow-inner, .shadow-sm {
+            box-shadow: 0 2px 16px rgba(0,0,0,0.5) !important;
+        }
+        .part-title {
+            color: #a5b4fc !important;
+            border-bottom: 1px solid #27272a !important;
+        }
+        .activity-card {
+            background-color: #23232a !important;
+            border-color: #6366f1 !important;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.15) !important;
+        }
+        .activity-card:hover {
+            background-color: #27272a !important;
+        }
+        .calendar-day-number {
+            color: #facc15 !important;
+        }
+        .calendar-day-activities {
+            color: #a5b4fc !important;
+        }
+        .no-activities-message {
+            color: #a1a1aa !important;
+        }
+        .view-toggle-button, .edit-button, .save-button, .cancel-button {
+            background-color: #4f46e5 !important;
+            color: #f3f4f6 !important;
+            border: none !important;
+            box-shadow: 0 4px 8px rgba(79,70,229,0.15) !important;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+        .view-toggle-button:hover, .edit-button:hover, .save-button:hover, .cancel-button:hover {
+            background-color: #6366f1 !important;
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 6px 16px rgba(99,102,241,0.25) !important;
+        }
+        .edit-button, .save-button {
+            background-color: #10b981 !important;
+        }
+        .edit-button:hover, .save-button:hover {
+            background-color: #059669 !important;
+        }
+        .cancel-button {
+            background-color: #ef4444 !important;
+        }
+        .cancel-button:hover {
+            background-color: #b91c1c !important;
+        }
+        .form-input, .form-textarea {
+            background-color: #18181b !important;
+            color: #f3f4f6 !important;
+            border: 1px solid #27272a !important;
+        }
+        .form-input:focus, .form-textarea:focus {
+            outline: 2px solid #6366f1 !important;
+            background-color: #23232a !important;
+        }
+        /* Menú hamburguesa e overlay en oscuro */
+        .mobile-menu {
+            background-color: #23232a !important;
+        }
+        .mobile-menu-overlay {
+            background: rgba(24,24,27,0.7) !important;
+        }
+        /* Animaciones suaves */
+        .mobile-menu, .activity-card, .view-toggle-button, .edit-button, .save-button, .cancel-button {
+            transition: all 0.3s cubic-bezier(.4,0,.2,1) !important;
+        }
+        .activity-card:active, .view-toggle-button:active, .edit-button:active, .save-button:active, .cancel-button:active {
+            transform: scale(0.97);
+        }
+        /* Feedback visual en botones activos */
+        .day-button.active, .view-toggle-button:focus, .edit-button:focus, .save-button:focus, .cancel-button:focus {
+            outline: 2px solid #facc15 !important;
+            outline-offset: 2px;
+        }
+        /* Mejor contraste para navegación */
+        .day-button {
+            background: #23232a !important;
+            color: #f3f4f6 !important;
+            border: 1px solid #27272a !important;
+        }
+        .day-button:hover {
+            background: #27272a !important;
+        }
+        /* Scrollbar oscuro */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #23232a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 4px;
+        }
         /* Base styles for a clean, modern look */
         body {
             font-family: 'Inter', sans-serif;
@@ -147,6 +257,60 @@
         .edit-button:hover {
             background-color: #059669; /* Darker green */
         }
+
+        /* --- INICIO: Menú hamburguesa para móvil --- */
+        .mobile-hamburger {
+            display: none;
+        }
+        .mobile-menu-overlay {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .mobile-hamburger {
+                display: block;
+                position: absolute;
+                top: 1.5rem;
+                right: 1.5rem;
+                z-index: 50;
+                background: none;
+                border: none;
+                padding: 0.5rem;
+            }
+            .sidebar-buttons-mobile-hidden {
+                display: none !important;
+            }
+            .mobile-menu-overlay {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.3);
+                z-index: 49;
+            }
+            .mobile-menu {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 75vw;
+                max-width: 320px;
+                height: 100vh;
+                background: #fff;
+                box-shadow: 2px 0 16px rgba(0,0,0,0.15);
+                z-index: 50;
+                padding: 2rem 1.5rem;
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+            }
+            .mobile-menu.open {
+                transform: translateX(0);
+            }
+        }
+        /* --- FIN: Menú hamburguesa para móvil --- */
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -156,13 +320,26 @@
         <p class="text-center text-xl mt-2 text-gray-600">Itinerario Detallado</p>
     </header>
 
-    <main class="flex flex-1 flex-col md:flex-row p-8 gap-8">
+    <main class="flex flex-1 flex-col md:flex-row p-8 gap-8 relative">
+        <!-- Botón hamburguesa solo visible en móvil -->
+        <button id="mobile-hamburger" class="mobile-hamburger" aria-label="Abrir menú" tabindex="0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <!-- Overlay y menú lateral para móvil -->
+        <div id="mobile-menu-overlay" class="mobile-menu-overlay" style="display:none;"></div>
+        <nav id="mobile-menu" class="mobile-menu" style="display:none;" aria-label="Menú principal">
+            <button id="close-mobile-menu" class="mb-8 self-end" aria-label="Cerrar menú" tabindex="0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <button id="mobile-toggle-view-button" class="view-toggle-button w-full mb-4" tabindex="0">Ver Calendario</button>
+            <button id="mobile-edit-day-button" class="edit-button w-full" tabindex="0">Editar Día</button>
+        </nav>
         <!-- Sidebar de navegación -->
         <aside class="w-full md:w-1/4 bg-white p-6 rounded-3xl shadow-xl scrollable-sidebar border border-neutral-200">
             <h2 class="text-3xl font-bold mb-6 text-gray-800">Días del Viaje</h2>
-            <div class="mb-5 flex flex-col gap-3">
-                <button id="toggle-view-button" class="view-toggle-button w-full">Ver Calendario</button>
-                <button id="edit-day-button" class="edit-button w-full">Editar Día</button>
+            <div class="mb-5 flex flex-col gap-3 sidebar-buttons-mobile-hidden">
+                <button id="toggle-view-button" class="view-toggle-button w-full" aria-label="Ver Calendario" tabindex="0">Ver Calendario</button>
+                <button id="edit-day-button" class="edit-button w-full" aria-label="Editar Día" tabindex="0">Editar Día</button>
             </div>
             <div id="day-navigation" class="flex flex-wrap md:flex-col gap-3">
                 <!-- Los botones de los días se insertarán aquí por JavaScript -->
@@ -836,6 +1013,61 @@
             // Show details of the first day by default
             showDayDetails(0);
         });
+
+        // --- INICIO: Menú hamburguesa para móvil y accesibilidad ---
+        const mobileHamburger = document.getElementById('mobile-hamburger');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const closeMobileMenu = document.getElementById('close-mobile-menu');
+        const mobileToggleViewButton = document.getElementById('mobile-toggle-view-button');
+        const mobileEditDayButton = document.getElementById('mobile-edit-day-button');
+
+        function openMobileMenu() {
+            mobileMenu.style.display = 'flex';
+            setTimeout(() => mobileMenu.classList.add('open'), 10);
+            mobileMenuOverlay.style.display = 'block';
+            mobileMenu.setAttribute('aria-modal', 'true');
+            mobileMenu.setAttribute('tabindex', '0');
+            mobileMenu.focus();
+        }
+        function closeMobileMenuFunc() {
+            mobileMenu.classList.remove('open');
+            setTimeout(() => { mobileMenu.style.display = 'none'; }, 300);
+            mobileMenuOverlay.style.display = 'none';
+            mobileMenu.removeAttribute('aria-modal');
+        }
+        mobileHamburger.addEventListener('click', openMobileMenu);
+        mobileHamburger.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') openMobileMenu(); });
+        closeMobileMenu.addEventListener('click', closeMobileMenuFunc);
+        closeMobileMenu.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') closeMobileMenuFunc(); });
+        mobileMenuOverlay.addEventListener('click', closeMobileMenuFunc);
+        // Sincronizar botones del menú móvil con los originales
+        mobileToggleViewButton.addEventListener('click', () => {
+            toggleViewButton.click();
+            closeMobileMenuFunc();
+        });
+        mobileEditDayButton.addEventListener('click', () => {
+            editDayButton.click();
+            closeMobileMenuFunc();
+        });
+        // Navegación por teclado en el menú móvil
+        mobileMenu.addEventListener('keydown', (e) => {
+            const focusable = Array.from(mobileMenu.querySelectorAll('button'));
+            const idx = focusable.indexOf(document.activeElement);
+            if (e.key === 'Tab') {
+                if (e.shiftKey && idx === 0) {
+                    e.preventDefault();
+                    focusable[focusable.length - 1].focus();
+                } else if (!e.shiftKey && idx === focusable.length - 1) {
+                    e.preventDefault();
+                    focusable[0].focus();
+                }
+            } else if (e.key === 'Escape') {
+                closeMobileMenuFunc();
+                mobileHamburger.focus();
+            }
+        });
+        // --- FIN: Menú hamburguesa para móvil y accesibilidad ---
     </script>
     <!-- Service Worker and Manifest for PWA -->
     <script>
@@ -946,4 +1178,6 @@
         }
     </script>
 </body>
+</html>
+
 </html>
