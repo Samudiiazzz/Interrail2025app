@@ -1,4 +1,4 @@
-import { redis } from '../../lib/redis'
+import { redis } from '../lib/redis'
 
 export default async function handler(req, res) {
   try {
