@@ -756,12 +756,17 @@ if (document.getElementById('save-day-button'))
         // Actualiza el itinerario local
         itinerary[selectedDayIdx].city = city;
         itinerary[selectedDayIdx].activities = [morning, afternoon, night];
+        // Antes de enviar, convierte startDate a string ISO
+        const itineraryToSend = itinerary.map(day => ({
+            ...day,
+            startDate: day.startDate instanceof Date ? day.startDate.toISOString().slice(0, 10) : day.startDate
+        }));
         // Envía al backend
         try {
             const res = await fetch('/api/guardar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(itinerary)
+                body: JSON.stringify({ itinerario: itineraryToSend })
             });
             const data = await res.json();
             if (data.ok) {
