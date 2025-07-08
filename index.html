@@ -752,7 +752,6 @@ if (document.getElementById('save-day-button'))
         const morning = document.getElementById('edit-morning-activity').value;
         const afternoon = document.getElementById('edit-afternoon-activity').value;
         const night = document.getElementById('edit-night-activity').value;
-        // Puedes añadir detalles y dormir si lo deseas
         // Actualiza el itinerario local
         itinerary[selectedDayIdx].city = city;
         itinerary[selectedDayIdx].activities = [morning, afternoon, night];
@@ -761,6 +760,11 @@ if (document.getElementById('save-day-button'))
             ...day,
             startDate: day.startDate instanceof Date ? day.startDate.toISOString().slice(0, 10) : day.startDate
         }));
+        // BLOQUEA SI EL ARRAY ESTÁ VACÍO
+        if (!Array.isArray(itineraryToSend) || !itineraryToSend.length) {
+            alert('No hay datos para guardar');
+            return;
+        }
         // Envía al backend
         try {
             const res = await fetch('/api/guardar', {
