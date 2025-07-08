@@ -534,6 +534,7 @@
 <script>
 let itinerary = [];
 let selectedDayIdx = 0; // Índice global del día seleccionado
+let currentCalendarDate = new Date(2025, 6, 1); // Asegura variable global para el mes de julio 2025
 
 async function cargarItinerario() {
     try {
@@ -646,7 +647,45 @@ function showCalendarView() {
     document.getElementById('calendar-view').classList.remove('hidden');
     document.getElementById('day-view').classList.add('hidden');
     document.getElementById('edit-day-form').classList.add('hidden');
-    renderCalendar(new Date());
+    renderCalendar(currentCalendarDate);
+}
+
+function renderCalendar(date) {
+    const activityCardsContainer = document.getElementById('activity-cards-container');
+    const noActivitiesMessage = document.getElementById('no-activities-message');
+    const currentMonthYear = document.getElementById('current-month-year');
+    activityCardsContainer.innerHTML = '';
+    noActivitiesMessage.classList.add('hidden');
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    currentMonthYear.textContent = `${new Date(year, month).toLocaleString('es-ES', { month: 'long', year: 'numeric' })}`;
+    // LOG para depuración
+    console.log('Itinerary en renderCalendar:', itinerary);
+    const activitiesInMonth = itinerary.filter(item => {
+        return item.startDate instanceof Date && !isNaN(item.startDate) &&
+               item.startDate.getFullYear() === year &&
+               item.startDate.getMonth() === month;
+    });
+    if (activitiesInMonth.length === 0) {
+        noActivitiesMessage.classList.remove('hidden');
+        return;
+    }
+    activitiesInMonth.sort((a, b) => a.startDate - b.startDate);
+    activitiesInMonth.forEach(dayData => {
+        const cardDiv = document.createElement('div');
+        cardDiv.classList.add('activity-card');
+        let cityText = dayData.city;
+        cardDiv.innerHTML = `
+            <div class="calendar-day-number">${dayData.startDate.getDate()}</div>
+            <div class="text-sm text-gray-500 mb-2">${dayData.city}</div>
+            <div class="text-base font-semibold text-gray-800">${dayData.activities[0] || ''}</div>
+        `;
+        cardDiv.addEventListener('click', () => {
+            const dayIndex = itinerary.indexOf(dayData);
+            showDayDetails(dayIndex);
+        });
+        activityCardsContainer.appendChild(cardDiv);
+    });
 }
 
 function showEditDayForm(idx) {
