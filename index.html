@@ -533,54 +533,25 @@
 </footer>
 <script>
 let itinerary = [];
+let selectedDayIdx = 0; // Índice global del día seleccionado
 
 async function cargarItinerario() {
     try {
         const res = await fetch("/api/leer");
         const data = await res.json();
-        if (data.itinerary?.length) {
+        if (data.error) {
+            alert("Error al cargar el itinerario: " + data.error);
+            itinerary = [];
+        } else if (data.itinerary?.length) {
             itinerary = data.itinerary;
         } else {
-            itinerary = 
-[
-  {
-    "startDate": "2025-07-16",
-    "city": "Milán",
-    "activities": ["Llegada a Milán", "Check-in en el alojamiento", "Paseo por el centro"]
-  },
-  {
-    "startDate": "2025-07-17",
-    "city": "Zermatt",
-    "activities": ["Excursión al Matterhorn", "Cena en restaurante suizo"]
-  }
-]
-;
+            itinerary = [];
         }
-
-        itinerary.forEach(day => {
-            if (typeof day.startDate === 'string') {
-                day.startDate = new Date(day.startDate);
-            }
-        });
-
         renderNavigation();
         showDayDetails(0);
     } catch (error) {
-        console.error("Error cargando itinerario:", error);
-        itinerary = 
-[
-  {
-    "startDate": "2025-07-16",
-    "city": "Milán",
-    "activities": ["Llegada a Milán", "Check-in en el alojamiento", "Paseo por el centro"]
-  },
-  {
-    "startDate": "2025-07-17",
-    "city": "Zermatt",
-    "activities": ["Excursión al Matterhorn", "Cena en restaurante suizo"]
-  }
-]
-;
+        alert("Error cargando itinerario: " + error.message);
+        itinerary = [];
         renderNavigation();
         showDayDetails(0);
     }
@@ -590,8 +561,144 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarItinerario();
 });
 
+function renderNavigation() {
+    const nav = document.getElementById('day-navigation');
+    if (nav) {
+        nav.innerHTML = '';
+        itinerary.forEach((day, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'day-button w-full';
+            btn.textContent = `${idx + 1}: ${day.city || 'Sin ciudad'}`;
+            btn.onclick = () => showDayDetails(idx);
+            nav.appendChild(btn);
+        });
+    }
+    const mobileNav = document.getElementById('mobile-day-navigation');
+    if (mobileNav) {
+        mobileNav.innerHTML = '';
+        itinerary.forEach((day, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'day-button w-full';
+            btn.textContent = `${idx + 1}: ${day.city || 'Sin ciudad'}`;
+            btn.onclick = () => {
+                showDayDetails(idx);
+                closeMobileMenu();
+            };
+            mobileNav.appendChild(btn);
+        });
+    }
+}
 
-// Resto del código original...
+function showDayDetails(idx) {
+    selectedDayIdx = idx;
+    const day = itinerary[idx];
+    if (!day) return;
+    document.getElementById('day-view').classList.remove('hidden');
+    document.getElementById('calendar-view').classList.add('hidden');
+    document.getElementById('edit-day-form').classList.add('hidden');
+
+    document.getElementById('day-title').textContent = `Día ${idx + 1}`;
+    document.getElementById('day-location').textContent = day.city || '';
+    document.getElementById('activity-morning').textContent = day.activities?.[0] || '';
+    document.getElementById('activity-afternoon').textContent = day.activities?.[1] || '';
+    document.getElementById('activity-night').textContent = day.activities?.[2] || '';
+}
+
+function showCalendarView() {
+    document.getElementById('calendar-view').classList.remove('hidden');
+    document.getElementById('day-view').classList.add('hidden');
+    document.getElementById('edit-day-form').classList.add('hidden');
+}
+
+function showEditDayForm(idx) {
+    selectedDayIdx = idx;
+    const day = itinerary[idx];
+    if (!day) return;
+    document.getElementById('edit-day-form').classList.remove('hidden');
+    document.getElementById('day-view').classList.add('hidden');
+    document.getElementById('calendar-view').classList.add('hidden');
+    document.getElementById('edit-title').value = `Día ${idx + 1}`;
+    document.getElementById('edit-location').value = day.city || '';
+    document.getElementById('edit-morning-activity').value = day.activities?.[0] || '';
+    document.getElementById('edit-morning-details').value = '';
+    document.getElementById('edit-afternoon-activity').value = day.activities?.[1] || '';
+    document.getElementById('edit-afternoon-details').value = '';
+    document.getElementById('edit-night-activity').value = day.activities?.[2] || '';
+    document.getElementById('edit-night-details').value = '';
+    document.getElementById('edit-sleep').value = '';
+}
+
+function openMobileMenu() {
+    document.getElementById('mobile-menu').style.display = 'block';
+    document.getElementById('mobile-menu-overlay').style.display = 'block';
+}
+function closeMobileMenu() {
+    document.getElementById('mobile-menu').style.display = 'none';
+    document.getElementById('mobile-menu-overlay').style.display = 'none';
+}
+
+// Listeners
+if (document.getElementById('mobile-hamburger'))
+    document.getElementById('mobile-hamburger').onclick = openMobileMenu;
+if (document.getElementById('close-mobile-menu'))
+    document.getElementById('close-mobile-menu').onclick = closeMobileMenu;
+if (document.getElementById('mobile-menu-overlay'))
+    document.getElementById('mobile-menu-overlay').onclick = closeMobileMenu;
+
+if (document.getElementById('mobile-toggle-view-button'))
+    document.getElementById('mobile-toggle-view-button').onclick = function() {
+        showCalendarView();
+        closeMobileMenu();
+    };
+if (document.getElementById('mobile-edit-day-button'))
+    document.getElementById('mobile-edit-day-button').onclick = function() {
+        showEditDayForm(selectedDayIdx);
+        closeMobileMenu();
+    };
+if (document.getElementById('toggle-view-button'))
+    document.getElementById('toggle-view-button').onclick = showCalendarView;
+if (document.getElementById('edit-day-button'))
+    document.getElementById('edit-day-button').onclick = function() {
+        showEditDayForm(selectedDayIdx);
+    };
+if (document.getElementById('cancel-edit-button'))
+    document.getElementById('cancel-edit-button').onclick = function() {
+        document.getElementById('edit-day-form').classList.add('hidden');
+        document.getElementById('day-view').classList.remove('hidden');
+    };
+// Guardar cambios del día editado
+if (document.getElementById('save-day-button'))
+    document.getElementById('save-day-button').onclick = async function() {
+        // Recoge los datos del formulario
+        const city = document.getElementById('edit-location').value;
+        const morning = document.getElementById('edit-morning-activity').value;
+        const afternoon = document.getElementById('edit-afternoon-activity').value;
+        const night = document.getElementById('edit-night-activity').value;
+        // Puedes añadir detalles y dormir si lo deseas
+        // Actualiza el itinerario local
+        itinerary[selectedDayIdx].city = city;
+        itinerary[selectedDayIdx].activities = [morning, afternoon, night];
+        // Envía al backend
+        try {
+            const res = await fetch('/api/guardar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(itinerary)
+            });
+            const data = await res.json();
+            if (data.ok) {
+                alert('Día guardado correctamente');
+                document.getElementById('edit-day-form').classList.add('hidden');
+                document.getElementById('day-view').classList.remove('hidden');
+                renderNavigation();
+                showDayDetails(selectedDayIdx);
+            } else {
+                alert('Error al guardar: ' + (data.error || 'Error desconocido'));
+            }
+        } catch (e) {
+            alert('Error de red al guardar: ' + e.message);
+        }
+    };
 </script>
 <!-- Service Worker and Manifest for PWA -->
 <script>
