@@ -646,6 +646,7 @@ function showCalendarView() {
     document.getElementById('calendar-view').classList.remove('hidden');
     document.getElementById('day-view').classList.add('hidden');
     document.getElementById('edit-day-form').classList.add('hidden');
+    renderCalendar(new Date());
 }
 
 function showEditDayForm(idx) {
