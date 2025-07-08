@@ -8,7 +8,6 @@ export default async function handler(req, res) {
       try {
         itinerary = JSON.parse(data);
       } catch (e) {
-        // Si el JSON está corrupto, responde con error y un array vacío
         return res.status(500).json({ error: "Datos corruptos en Redis", itinerary: [] });
       }
     }
