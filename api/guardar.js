@@ -1,5 +1,12 @@
 import { redis } from '../lib/redis.js'
 
+
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+};
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     console.log('Método no permitido:', req.method);
