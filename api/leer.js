@@ -191,6 +191,17 @@ export default async function handler(req, res) {
     } else {
       itinerary = ITINERARIO_PREDEFINIDO;
     }
+    if (Array.isArray(itinerary)) {
+      itinerary = itinerary.map(day => ({
+        ...day,
+        startDate: day.startDate // asegúrate de que sea string ISO
+      }));
+    }
+    itinerary.forEach(day => {
+      if (typeof day.startDate === 'string') {
+        day.startDate = new Date(day.startDate);
+      }
+    });
     res.status(200).json({ itinerary });
   } catch (error) {
     console.error("ERROR EN HANDLER:", error);
