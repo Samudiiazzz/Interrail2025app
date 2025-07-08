@@ -192,9 +192,12 @@ export default async function handler(req, res) {
       itinerary = ITINERARIO_PREDEFINIDO;
     }
     if (Array.isArray(itinerary)) {
-      itinerary = itinerary.map(day => ({
-        ...day,
-        startDate: day.startDate // asegúrate de que sea string ISO
+      itinerary = itinerary.map((day, idx) => ({
+        day: day.day ?? (idx + 1),
+        startDate: typeof day.startDate === 'string' ? day.startDate : (day.startDate instanceof Date ? day.startDate.toISOString().slice(0, 10) : ''),
+        city: day.city ?? '',
+        activities: Array.isArray(day.activities) ? day.activities : ['', '', ''],
+        part: day.part ?? '',
       }));
     }
     itinerary.forEach(day => {
