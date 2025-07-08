@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Interrail 2025: Itinerario Interactivo</title>
+<!-- Manifest para PWA -->
+<link href="/manifest.json" rel="manifest"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+        /* RESET Y BASE PARA TEMA OSCURO */
+        html, body {
+            background: #18181b !important;
+            color: #f3f4f6 !important;
+            font-family: 'Inter', sans-serif;
+        }
+        header, footer, .bg-white, .scrollable-sidebar, .activity-card, .mobile-menu, .edit-day-form, .rounded-3xl, .rounded-b-3xl, .rounded-t-3xl, .rounded-xl {
+            background: #23232a !important;
+            color: #f3f4f6 !important;
+        }
+        .border, .border-neutral-200, .border-blue-200, .border-neutral-300 {
+            border-color: #27272a !important;
+        }
+        .shadow-xl, .shadow-lg, .shadow-inner, .shadow-sm {
+            box-shadow: 0 2px 16px rgba(0,0,0,0.5) !important;
+        }
+        .part-title {
+            color: #a5b4fc !important;
+            border-bottom: 1px solid #27272a !important;
+        }
+        .activity-card {
+            background: #23232a !important;
+            border: 2px solid #6366f1 !important;
+            color: #f3f4f6 !important;
+            box-shadow: 0 4px 24px 0 rgba(99,102,241,0.10) !important;
+            border-radius: 1.2rem !important;
+            padding: 1.5rem 1.2rem !important;
+            margin-bottom: 1.2rem !important;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 340px !important;
+            width: 96%;
+            margin: 0 !important;
+            flex: 1 1 280px;
+            transition: background 0.2s, border 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .activity-card:hover, .activity-card:focus {
+            background: #353569 !important;
+            border-color: #facc15 !important;
+            color: #fff !important;
+            box-shadow: 0 8px 32px 0 rgba(250,204,21,0.10) !important;
+        }
+        .activity-card .calendar-day-number {
+            font-size: 2.1rem !important;
+            font-weight: bold;
+            color: #facc15 !important;
+            margin-bottom: 0.2rem;
+        }
+        .activity-card .text-sm {
+            color: #a5b4fc !important;
+            font-size: 1.1rem !important;
+            margin-bottom: 0.2rem;
+        }
+        .activity-card .text-base {
+            color: #fff !important;
+            font-size: 1.15rem !important;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+        .activity-card .calendar-day-activities {
+            color: #a5b4fc !important;
+            font-size: 1rem !important;
+            margin-bottom: 0.1rem;
+        }
+        .no-activities-message {
+            color: #a1a1aa !important;
+        }
+        .view-toggle-button, .edit-button, .save-button, .cancel-button {
+            background: #4f46e5 !important;
+            color: #f3f4f6 !important;
+            border: none !important;
+            box-shadow: 0 4px 8px rgba(79,70,229,0.15) !important;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+        .view-toggle-button:hover, .edit-button:hover, .save-button:hover, .cancel-button:hover {
+            background: #6366f1 !important;
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 6px 16px rgba(99,102,241,0.25) !important;
+        }
+        .edit-button, .save-button {
+            background: #10b981 !important;
+        }
+        .edit-button:hover, .save-button:hover {
+            background: #059669 !important;
+        }
+        .cancel-button {
+            background: #ef4444 !important;
+        }
+        .cancel-button:hover {
+            background: #b91c1c !important;
+        }
+        .form-input, .form-textarea {
+            background: #18181b !important;
+            color: #f3f4f6 !important;
+            border: 1px solid #27272a !important;
+        }
+        .form-input:focus, .form-textarea:focus {
+            outline: 2px solid #6366f1 !important;
+            background: #23232a !important;
+        }
+        /* Menú hamburguesa e overlay en oscuro */
+        .mobile-menu {
+            background: #23232a !important;
+        }
+        .mobile-menu-overlay {
+            background: rgba(24,24,27,0.7) !important;
+        }
+        /* Animaciones suaves */
+        .mobile-menu, .activity-card, .view-toggle-button, .edit-button, .save-button, .cancel-button {
+            transition: all 0.3s cubic-bezier(.4,0,.2,1) !important;
+        }
+        .activity-card:active, .view-toggle-button:active, .edit-button:active, .save-button:active, .cancel-button:active {
+            transform: scale(0.97);
+        }
+        /* Feedback visual en botones activos */
+        .day-button.active, .view-toggle-button:focus, .edit-button:focus, .save-button:focus, .cancel-button:focus {
+            outline: 2px solid #facc15 !important;
+            outline-offset: 2px;
+        }
+        /* Mejor contraste para navegación */
+        .day-button {
+            background: #23232a !important;
+            color: #f3f4f6 !important;
+            border: 1px solid #27272a !important;
+        }
+        .day-button:hover {
+            background: #27272a !important;
+        }
+        /* Scrollbar oscuro */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #23232a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 4px;
+        }
+        /* --- RESPONSIVIDAD MEJORADA --- */
+        main, .main-content, .scrollable-sidebar, .activity-cards-container, .activity-card, section, aside {
+            box-sizing: border-box;
+        }
+        main {
+            padding: 1rem !important;
+            gap: 1rem !important;
+        }
+        @media (max-width: 1024px) {
+            main {
+                flex-direction: column !important;
+                gap: 1.5rem !important;
+            }
+            .scrollable-sidebar {
+                max-height: none !important;
+            }
+            .activity-card {
+                border-radius: 1rem !important;
+                padding: 1.2rem 0.7rem !important;
+            }
+            .activity-cards-container {
+                gap: 1rem !important;
+            }
+            .activity-card {
+                max-width: 90vw !important;
+            }
+        }
+        @media (max-width: 768px) {
+            main {
+                padding: 0.5rem !important;
+            }
+            .scrollable-sidebar, aside {
+                padding: 1rem !important;
+                border-radius: 1rem !important;
+            }
+            section {
+                padding: 1rem !important;
+                border-radius: 1rem !important;
+            }
+            .activity-cards-container {
+                gap: 0.5rem !important;
+                padding: 0 0 1rem 0 !important;
+            }
+            .activity-card {
+                width: 80vw !important;
+                max-width: 320px !important;
+                margin: 0 auto 1rem auto !important;
+                border-radius: 1.2rem !important;
+                text-align: center !important;
+                align-items: center !important;
+            }
+            .activity-card > * {
+                text-align: center !important;
+            }
+            .sidebar-buttons-mobile-hidden,
+            #day-navigation {
+                display: none !important;
+            }
+            .mobile-menu {
+                width: 100vw !important;
+                max-width: 100vw !important;
+                left: 0 !important;
+                top: 0 !important;
+                height: 100vh !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                padding: 2rem 1rem 1rem 1rem !important;
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                z-index: 100;
+            }
+            .mobile-menu-content {
+                display: flex;
+                flex-direction: column;
+                gap: 2rem;
+                height: 100%;
+            }
+            .mobile-menu-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+            .mobile-menu-days {
+                flex: 1 1 0;
+                overflow-y: auto;
+                background: none;
+                padding-bottom: 1rem;
+            }
+            .mobile-menu-days .part-title {
+                margin-top: 1.5rem;
+                margin-bottom: 0.5rem;
+                font-size: 1.2rem;
+                padding-left: 0.5rem;
+            }
+            .mobile-menu-days button.day-button {
+                width: 100%;
+                margin-bottom: 0.5rem;
+                font-size: 1.1rem;
+                padding: 0.9rem 1rem;
+                border-radius: 0.75rem;
+            }
+            #close-mobile-menu {
+                position: absolute;
+                top: 1.2rem;
+                right: 1.2rem;
+                z-index: 101;
+                background: none;
+                border: none;
+                padding: 0.5rem;
+            }
+            h1 {
+                font-size: 2rem !important;
+                line-height: 2.4rem !important;
+                padding: 0.5rem 0 !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .activity-card {
+                width: 90vw !important;
+                max-width: 98vw !important;
+                padding: 0.7rem 0.1rem !important;
+            }
+            .scrollable-sidebar, aside, section {
+                padding: 0.5rem !important;
+            }
+            h1 {
+                font-size: 1.4rem !important;
+                line-height: 1.7rem !important;
+            }
+        }
+        /* --- FIN RESPONSIVIDAD --- */
+        /* --- ARREGLO DE COLORES DE TEXTO Y SVG --- */
+        h1, h2, h3, h4, h5, h6, label, .text-gray-800, .text-gray-900, .text-gray-700, .text-gray-600, .text-blue-600, .text-blue-800, .text-green-600, .text-green-500, .text-indigo-700, .text-gray-500 {
+            color: #f3f4f6 !important;
+        }
+        .text-blue-500, .text-green-500, .text-indigo-700, .text-blue-600, .text-blue-800, .text-green-600, .text-green-500, .text-indigo-700 {
+            color: #818cf8 !important;
+        }
+        svg {
+            color: #a5b4fc !important;
+        }
+        /* --- FIN ARREGLO DE COLORES --- */
+        /* Botones de acción destacados */
+        .view-toggle-button, .edit-button {
+            font-size: 1.15rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.02em;
+            padding: 1.1rem 2rem !important;
+            border-radius: 1rem !important;
+            box-shadow: 0 6px 24px 0 rgba(99,102,241,0.18) !important;
+            border: 2px solid #6366f1 !important;
+            background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%) !important;
+            color: #fff !important;
+            transition: background 0.2s, box-shadow 0.2s, border 0.2s, color 0.2s;
+        }
+        .view-toggle-button:hover, .edit-button:hover {
+            background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%) !important;
+            color: #facc15 !important;
+            border-color: #facc15 !important;
+            box-shadow: 0 8px 32px 0 rgba(250,204,21,0.18) !important;
+        }
+        .edit-button {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%) !important;
+            border-color: #10b981 !important;
+        }
+        .edit-button:hover {
+            background: linear-gradient(90deg, #34d399 0%, #10b981 100%) !important;
+            color: #fff !important;
+            border-color: #facc15 !important;
+        }
+        /* Contraste para los botones de los días */
+        .day-button {
+            background: #23232a !important;
+            color: #f3f4f6 !important;
+            border: 2px solid #6366f1 !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 8px 0 rgba(99,102,241,0.10) !important;
+            transition: background 0.2s, color 0.2s, border 0.2s, box-shadow 0.2s;
+        }
+        .day-button:hover, .day-button:focus {
+            background: #6366f1 !important;
+            color: #fff !important;
+            border-color: #facc15 !important;
+            box-shadow: 0 4px 16px 0 rgba(250,204,21,0.15) !important;
+        }
+        .day-button.active {
+            background: #facc15 !important;
+            color: #23232a !important;
+            border-color: #facc15 !important;
+            box-shadow: 0 6px 24px 0 rgba(250,204,21,0.18) !important;
+        }
+        /* Fondo y ajuste del contenedor de tarjetas calendario */
+        #calendar-view {
+            background: #18181b !important;
+            border-radius: 1.2rem !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .activity-cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            background: transparent !important;
+            border-radius: 1.2rem !important;
+            width: 100%;
+            max-width: 100vw !important;
+            margin: 0 auto !important;
+            padding: 0 0 1.5rem 0 !important;
+            box-sizing: border-box;
+            gap: 1.5rem !important;
+        }
+        .activity-card {
+            border-radius: 1.2rem !important;
+            min-width: 260px !important;
+            max-width: 400px !important;
+            width: 100%;
+            margin: 0 !important;
+            flex: 1 1 320px;
+        }
+        @media (max-width: 1024px) {
+            .activity-cards-container {
+                gap: 1rem !important;
+            }
+            .activity-card {
+                min-width: 220px !important;
+                max-width: 95vw !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .activity-cards-container {
+                gap: 0.5rem !important;
+                padding: 0 0 1rem 0 !important;
+            }
+            .activity-card {
+                min-width: 90vw !important;
+                max-width: 98vw !important;
+                width: 98vw !important;
+                margin: 0 auto 1rem auto !important;
+                border-radius: 1.2rem !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .activity-card {
+                min-width: 98vw !important;
+                max-width: 99vw !important;
+                width: 99vw !important;
+                padding: 0.7rem 0.1rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+<header class="bg-white p-6 shadow-lg rounded-b-3xl">
+<h1 class="text-5xl font-extrabold text-center tracking-tight text-indigo-700">INTERRAIL 2025</h1>
+<p class="text-center text-xl mt-2 text-gray-600">Itinerario Detallado</p>
+</header>
+<main class="flex flex-1 flex-col md:flex-row p-8 gap-8 relative">
+<!-- Botón hamburguesa solo visible en móvil -->
+<button aria-label="Abrir menú" class="mobile-hamburger" id="mobile-hamburger" tabindex="0">
+<svg class="h-10 w-10 text-indigo-700" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<!-- Overlay y menú lateral para móvil -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay" style="display:none;"></div>
+<nav aria-label="Menú principal" class="mobile-menu" id="mobile-menu" style="display:none;">
+<button aria-label="Cerrar menú" id="close-mobile-menu" tabindex="0">
+<svg class="h-10 w-10 text-gray-700" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<div class="mobile-menu-content">
+<div class="mobile-menu-actions">
+<button class="view-toggle-button w-full" id="mobile-toggle-view-button" tabindex="0">Ver Calendario</button>
+<button class="edit-button w-full" id="mobile-edit-day-button" tabindex="0">Editar Día</button>
+</div>
+<div class="mobile-menu-days" id="mobile-day-navigation"></div>
+</div>
+</nav>
+<!-- Sidebar de navegación -->
+<aside class="w-full md:w-1/4 bg-white p-6 rounded-3xl shadow-xl scrollable-sidebar border border-neutral-200">
+<h2 class="text-3xl font-bold mb-6 text-gray-800 sidebar-buttons-mobile-hidden">Días del Viaje</h2>
+<div class="mb-5 flex flex-col gap-3 sidebar-buttons-mobile-hidden">
+<button aria-label="Ver Calendario" class="view-toggle-button w-full" id="toggle-view-button" tabindex="0">Ver Calendario</button>
+<button aria-label="Editar Día" class="edit-button w-full" id="edit-day-button" tabindex="0">Editar Día</button>
+</div>
+<div class="flex flex-wrap md:flex-col gap-3" id="day-navigation">
+<!-- Los botones de los días se insertarán aquí por JavaScript -->
+</div>
+</aside>
+<!-- Contenido principal del itinerario -->
+<section class="w-full md:w-3/4 bg-white p-8 rounded-3xl shadow-xl border border-neutral-200">
+<!-- Vista de detalles del día -->
+<div id="day-view">
+<h2 class="text-5xl font-extrabold text-gray-900 mb-4" id="day-title">Selecciona un día para ver los detalles</h2>
+<h3 class="text-3xl font-bold text-indigo-700 mb-8" id="day-location"></h3>
+<div class="space-y-8 text-gray-800">
+<div>
+<p class="text-xl font-bold text-blue-600 flex items-center mb-2"><svg class="h-7 w-7 mr-3 text-blue-500" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v1m0 16v1m9-9h1M3 12H2m15.325-7.757l.707-.707M5.636 18.364l-.707.707M18.364 5.636l.707-.707M5.636 5.636l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg> Mañana:</p>
+<p class="ml-10 text-lg text-gray-700 mb-2" id="activity-morning"></p>
+<ul class="ml-16 text-base list-disc list-inside text-gray-600 space-y-1" id="morning-details"></ul>
+</div>
+<div>
+<p class="text-xl font-bold text-blue-600 flex items-center mb-2"><svg class="h-7 w-7 mr-3 text-blue-500" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 12H6M6 12l3-3m-3 3l3 3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg> Tarde:</p>
+<p class="ml-10 text-lg text-gray-700 mb-2" id="activity-afternoon"></p>
+<ul class="ml-16 text-base list-disc list-inside text-gray-600 space-y-1" id="afternoon-details"></ul>
+</div>
+<div>
+<p class="text-xl font-bold text-blue-600 flex items-center mb-2"><svg class="h-7 w-7 mr-3 text-blue-500" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M10 7v5l4 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg> Noche:</p>
+<p class="ml-10 text-lg text-gray-700 mb-2" id="activity-night"></p>
+<ul class="ml-16 text-base list-disc list-inside text-gray-600 space-y-1" id="night-details"></ul>
+</div>
+<div>
+<p class="text-xl font-bold text-blue-600 flex items-center mb-2"><svg class="h-7 w-7 mr-3 text-blue-500" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg> Dormir:</p>
+<p class="ml-10 text-lg text-gray-700" id="day-sleep"></p>
+</div>
+<div class="mt-10">
+<p class="text-xl font-bold text-green-600 flex items-center mb-2"><svg class="h-7 w-7 mr-3 text-green-500" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg> Mis Notas:</p>
+<textarea class="w-full p-4 mt-2 border border-neutral-300 rounded-xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-700 text-lg transition-all duration-200" id="personal-notes" placeholder="Escribe aquí tus notas personales para este día..." rows="5"></textarea>
+</div>
+</div>
+</div>
+<!-- Formulario de edición del día (inicialmente oculto) -->
+<div class="hidden mt-8 p-6 bg-blue-50 rounded-xl shadow-inner border border-blue-200" id="edit-day-form">
+<h3 class="text-3xl font-bold text-blue-800 mb-6">Editar Detalles del Día</h3>
+<div class="space-y-4">
+<div>
+<label class="form-label" for="edit-title">Título del Día:</label>
+<input class="form-input" id="edit-title" type="text"/>
+</div>
+<div>
+<label class="form-label" for="edit-location">Ubicación:</label>
+<input class="form-input" id="edit-location" type="text"/>
+</div>
+<div>
+<label class="form-label" for="edit-morning-activity">Actividad Mañana:</label>
+<input class="form-input" id="edit-morning-activity" type="text"/>
+</div>
+<div>
+<label class="form-label" for="edit-morning-details">Detalles Mañana (una por línea):</label>
+<textarea class="form-textarea" id="edit-morning-details" rows="3"></textarea>
+</div>
+<div>
+<label class="form-label" for="edit-afternoon-activity">Actividad Tarde:</label>
+<input class="form-input" id="edit-afternoon-activity" type="text"/>
+</div>
+<div>
+<label class="form-label" for="edit-afternoon-details">Detalles Tarde (una por línea):</label>
+<textarea class="form-textarea" id="edit-afternoon-details" rows="3"></textarea>
+</div>
+<div>
+<label class="form-label" for="edit-night-activity">Actividad Noche:</label>
+<input class="form-input" id="edit-night-activity" type="text"/>
+</div>
+<div>
+<label class="form-label" for="edit-night-details">Detalles Noche (una por línea):</label>
+<textarea class="form-textarea" id="edit-night-details" rows="3"></textarea>
+</div>
+<div>
+<label class="form-label" for="edit-sleep">Dormir:</label>
+<input class="form-input" id="edit-sleep" type="text"/>
+</div>
+</div>
+<div class="mt-8 flex justify-end gap-4">
+<button class="save-button" id="save-day-button">Guardar Cambios</button>
+<button class="cancel-button" id="cancel-edit-button">Cancelar</button>
+</div>
+</div>
+<!-- Vista de calendario (inicialmente oculta) -->
+<div class="hidden" id="calendar-view">
+<h2 class="text-4xl font-extrabold text-gray-900 mb-8 text-center">Calendario del Itinerario</h2>
+<div class="flex justify-center items-center mb-6">
+<h3 class="text-3xl font-bold text-gray-800" id="current-month-year"></h3>
+</div>
+<div class="flex flex-wrap justify-center gap-4 p-4" id="activity-cards-container">
+<!-- Las tarjetas de actividad se insertarán aquí por JavaScript -->
+</div>
+<p class="no-activities-message hidden" id="no-activities-message">No hay actividades programadas para este mes.</p>
+</div>
+</section>
+</main>
+<footer class="bg-gray-900 text-white p-6 text-center text-lg mt-8 rounded-t-3xl shadow-inner">
+<p>© 2025 Interrail. Todos los derechos reservados.</p>
+</footer>
+<script>
+let itinerary = [];
+
+async function cargarItinerario() {
+    try {
+        const res = await fetch("/api/leer");
+        const data = await res.json();
+        if (data.itinerary?.length) {
+            itinerary = data.itinerary;
+        } else {
+            itinerary = 
+[
+  {
+    "startDate": "2025-07-16",
+    "city": "Milán",
+    "activities": ["Llegada a Milán", "Check-in en el alojamiento", "Paseo por el centro"]
+  },
+  {
+    "startDate": "2025-07-17",
+    "city": "Zermatt",
+    "activities": ["Excursión al Matterhorn", "Cena en restaurante suizo"]
+  }
+]
+;
+        }
+
+        itinerary.forEach(day => {
+            if (typeof day.startDate === 'string') {
+                day.startDate = new Date(day.startDate);
+            }
+        });
+
+        renderNavigation();
+        showDayDetails(0);
+    } catch (error) {
+        console.error("Error cargando itinerario:", error);
+        itinerary = 
+[
+  {
+    "startDate": "2025-07-16",
+    "city": "Milán",
+    "activities": ["Llegada a Milán", "Check-in en el alojamiento", "Paseo por el centro"]
+  },
+  {
+    "startDate": "2025-07-17",
+    "city": "Zermatt",
+    "activities": ["Excursión al Matterhorn", "Cena en restaurante suizo"]
+  }
+]
+;
+        renderNavigation();
+        showDayDetails(0);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    cargarItinerario();
+});
+
+
+// Resto del código original...
+</script>
+<!-- Service Worker and Manifest for PWA -->
+<script>
+        // This script is for Canvas demonstration only.
+        // In a production environment, service-worker.js and manifest.json
+        // should be separate files in the root directory.
+
+        // Manifest.json simulation
+        const manifestContent = {
+            "name": "Interrail 2025",
+            "short_name": "Interrail",
+            "description": "Itinerario interactivo de tu viaje Interrail 2025.",
+            "start_url": "./",
+            "display": "standalone",
+            "background_color": "#f8fafc",
+            "theme_color": "#4f46e5",
+            "icons": [
+                {
+                    "src": "https://placehold.co/192x192/4f46e5/ffffff?text=IR",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://placehold.co/512x512/4f46e5/ffffff?text=IR",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+
+        const blob = new Blob([JSON.stringify(manifestContent)], { type: 'application/json' });
+        const manifestUrl = URL.createObjectURL(blob);
+        document.querySelector('link[rel="manifest"]').setAttribute('href', manifestUrl);
+
+        // Service-worker.js simulation
+        const serviceWorkerContent = `
+            const CACHE_NAME = 'itinerary-cache-v1';
+            const urlsToCache = [
+                './',
+                './index.html',
+                'https://cdn.tailwindcss.com'
+            ];
+
+            self.addEventListener('install', event => {
+                event.waitUntil(
+                    caches.open(CACHE_NAME)
+                        .then(cache => {
+                            console.log('Cache opened');
+                            return cache.addAll(urlsToCache);
+                        })
+                );
+            });
+
+            self.addEventListener('fetch', event => {
+                event.respondWith(
+                    caches.match(event.request)
+                        .then(response => {
+                            if (response) {
+                                return response;
+                            }
+                            return fetch(event.request).then(
+                                function(response) {
+                                    if(!response || response.status !== 200 || response.type !== 'basic') {
+                                        return response;
+                                    }
+                                    var responseToCache = response.clone();
+                                    caches.open(CACHE_NAME)
+                                        .then(function(cache) {
+                                            cache.put(event.request, responseToCache);
+                                        });
+                                    return response;
+                                }
+                            );
+                        })
+                );
+            });
+
+            self.addEventListener('activate', event => {
+                const cacheWhitelist = [CACHE_NAME];
+                event.waitUntil(
+                    caches.keys().then(cacheNames => {
+                        return Promise.all(
+                            cacheNames.map(cacheName => {
+                                if (cacheWhitelist.indexOf(cacheName) === -1) {
+                                    return caches.delete(cacheName);
+                                }
+                            })
+                        );
+                    })
+                );
+            });
+        `;
+
+        const swBlob = new Blob([serviceWorkerContent], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+
+        // Re-register service worker with the Blob URL
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register(swUrl)
+                    .then(registration => {
+                        console.log('Service Worker registered successfully (Blob URL):', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed (Blob URL):', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
