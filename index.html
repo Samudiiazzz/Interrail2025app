@@ -562,31 +562,61 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function renderNavigation() {
-    const nav = document.getElementById('day-navigation');
-    if (nav) {
-        nav.innerHTML = '';
-        itinerary.forEach((day, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'day-button w-full';
-            btn.textContent = `${idx + 1}: ${day.city || 'Sin ciudad'}`;
-            btn.onclick = () => showDayDetails(idx);
-            nav.appendChild(btn);
-        });
-    }
-    const mobileNav = document.getElementById('mobile-day-navigation');
-    if (mobileNav) {
-        mobileNav.innerHTML = '';
-        itinerary.forEach((day, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'day-button w-full';
-            btn.textContent = `${idx + 1}: ${day.city || 'Sin ciudad'}`;
-            btn.onclick = () => {
-                showDayDetails(idx);
+    dayNavigation.innerHTML = ''; // Navegación lateral (solo desktop/tablet)
+    const mobileDayNav = document.getElementById('mobile-day-navigation');
+    if (mobileDayNav) mobileDayNav.innerHTML = '';
+    let currentPart = "";
+    itinerary.forEach((day, index) => {
+        if (day.part !== currentPart) {
+            currentPart = day.part;
+            const partTitle = document.createElement('h3');
+            partTitle.textContent = currentPart;
+            partTitle.classList.add('part-title');
+            // Solo añadir en desktop
+            dayNavigation.appendChild(partTitle);
+            // En móvil, también añadir título de parte
+            if (mobileDayNav) {
+                const mobilePartTitle = document.createElement('h3');
+                mobilePartTitle.textContent = currentPart;
+                mobilePartTitle.classList.add('part-title');
+                mobileDayNav.appendChild(mobilePartTitle);
+            }
+        }
+        // Botón de día para desktop
+        const button = document.createElement('button');
+        button.textContent = `${day.day} - ${day.city}`;
+        button.classList.add(
+            'day-button',
+            'w-full',
+            'md:w-auto',
+            'text-left',
+            'px-5',
+            'py-3',
+            'rounded-xl',
+            'hover:bg-blue-100',
+            'focus:outline-none',
+            'focus:ring-2',
+            'focus:ring-blue-500',
+            'focus:ring-opacity-50',
+            'transition-colors',
+            'duration-200',
+            'ease-in-out',
+            'text-lg',
+            'text-gray-700'
+        );
+        button.setAttribute('data-day-index', index);
+        button.addEventListener('click', () => showDayDetails(index));
+        dayNavigation.appendChild(button);
+        // Botón de día para menú móvil
+        if (mobileDayNav) {
+            const mobileButton = button.cloneNode(true);
+            mobileButton.addEventListener('click', () => {
+                showDayDetails(index);
                 closeMobileMenu();
-            };
-            mobileNav.appendChild(btn);
-        });
-    }
+            });
+            mobileDayNav.appendChild(mobileButton);
+        }
+    });
 }
 
 function showDayDetails(idx) {
