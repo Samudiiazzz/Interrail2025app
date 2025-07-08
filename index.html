@@ -561,6 +561,9 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarItinerario();
 });
 
+// Referencias a elementos del DOM
+const dayNavigation = document.getElementById('day-navigation');
+
 function renderNavigation() {
     dayNavigation.innerHTML = ''; // Navegación lateral (solo desktop/tablet)
     const mobileDayNav = document.getElementById('mobile-day-navigation');
