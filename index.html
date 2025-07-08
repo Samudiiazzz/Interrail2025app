@@ -544,6 +544,11 @@ async function cargarItinerario() {
             itinerary = [];
         } else if (data.itinerary?.length) {
             itinerary = data.itinerary;
+            itinerary.forEach(day => {
+                if (typeof day.startDate === 'string') {
+                    day.startDate = new Date(day.startDate);
+                }
+            });
         } else {
             itinerary = [];
         }
