@@ -5,6 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
   try {
+    console.log('BODY RECIBIDO:', req.body);
     const itinerario = req.body.itinerario;
     if (!Array.isArray(itinerario) || !itinerario.length) {
       return res.status(400).json({ error: 'El itinerario debe ser un array no vacío' });
