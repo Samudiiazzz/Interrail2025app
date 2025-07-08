@@ -13,6 +13,7 @@ export default async function handler(req, res) {
     }
     res.status(200).json({ itinerary });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "No se pudo leer el itinerario", itinerary: [] });
   }
 }
