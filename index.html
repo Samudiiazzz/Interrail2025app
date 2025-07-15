@@ -11,29 +11,48 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            --bg-primary: #1A1A1A;
-            --bg-secondary: #2E2E2E;
-            --text-primary: #F5F5F5;
-            --text-secondary: #B0B0B0;
-            --accent-indigo: #8A4AF3;
-            --accent-indigo-hover: #A97FFB;
-            --accent-yellow: #8A4AF3;
-            --border-color: #2E2E2E;
+            --bg-primary: #121212;
+            --bg-secondary: #1E1E1E;
+            --text-primary: #EAEAEA;
+            --text-secondary: #a1a1aa;
+            --accent-indigo: #4f46e5;
+            --accent-indigo-hover: #6366f1;
+            --accent-yellow: #facc15;
+            --border-color: #333;
         }
         html, body {
             background-color: var(--bg-primary) !important;
             color: var(--text-primary) !important;
             font-family: 'Inter', sans-serif;
             scroll-behavior: smooth;
-            letter-spacing: 0.01em;
         }
+        h1, h2, h3 { font-weight: 700; }
+        h1 { font-size: 2.25rem; line-height: 2.5rem; }
+        h2 { font-size: 1.75rem; line-height: 2rem; }
+        h3 { font-size: 1.25rem; line-height: 1.75rem; }
+        p, label, span { font-weight: 400; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
         header, footer, .component-bg {
             background-color: var(--bg-secondary) !important;
             border-color: var(--border-color) !important;
-            box-shadow: 0 2px 12px rgba(138,74,243,0.04) !important;
         }
         .soft-shadow {
-            box-shadow: 0 2px 12px rgba(138,74,243,0.08) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+        }
+        #progress-container {
+            background-color: #2a2a2e;
+            border-radius: 99px;
+            overflow: hidden;
+            height: 10px;
+            margin: 1rem 0;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--accent-yellow);
+            transition: width 0.5s ease-in-out;
         }
         .primary-button {
             background-color: var(--accent-indigo) !important;
@@ -41,19 +60,13 @@
             border-radius: 0.75rem;
             padding: 0.75rem 1.5rem;
             font-weight: 600;
-            letter-spacing: 0.01em;
-            box-shadow: 0 2px 8px rgba(138,74,243,0.10);
-            border: none;
-            transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+            transition: background-color 0.2s, transform 0.2s;
         }
-        .primary-button:hover, .primary-button:focus {
+        .primary-button:hover {
             background-color: var(--accent-indigo-hover) !important;
-            color: var(--bg-primary) !important;
-            box-shadow: 0 4px 16px rgba(169,127,251,0.13);
-            outline: none;
         }
         .primary-button:active {
-            transform: scale(0.97);
+            transform: scale(0.96);
         }
         .day-button {
             background-color: var(--bg-secondary);
@@ -64,130 +77,151 @@
             padding: 0.75rem 1rem;
             border-radius: 0.5rem;
             font-weight: 500;
-            letter-spacing: 0.01em;
-            box-shadow: none;
-            margin-bottom: 0.25rem;
-            transition: all 0.18s;
+            transition: all 0.2s;
         }
-        .day-button:hover, .day-button:focus {
+        .day-button:hover {
             background-color: var(--accent-indigo-hover);
             border-color: var(--accent-indigo-hover);
-            color: var(--bg-primary);
-            outline: none;
+            color: white;
         }
         .day-button.active {
             background-color: var(--accent-yellow) !important;
             color: var(--bg-primary) !important;
-            border-color: var(--accent-yellow) !important;
             font-weight: 700;
+            border-color: var(--accent-yellow) !important;
         }
         #day-view .activity-item {
-            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
         #day-view .activity-icon {
+            flex-shrink: 0;
             color: var(--accent-indigo-hover);
-            opacity: 0.85;
+            width: 2rem;
+            height: 2rem;
+            margin-top: 0.125rem;
         }
         #day-view .activity-content p {
-            color: var(--text-primary);
-            font-size: 1.13rem;
+            font-size: 1.125rem;
             font-weight: 500;
-            line-height: 1.6;
+            color: var(--text-primary);
         }
         #day-view .activity-content ul {
-            color: var(--text-secondary);
-            font-size: 1rem;
+            list-style: disc;
+            padding-left: 1.25rem;
             margin-top: 0.5rem;
+            color: var(--text-secondary);
         }
         #calendar-view .activity-card {
             background-color: var(--bg-secondary);
+            padding: 1.25rem;
             border-radius: 1rem;
-            box-shadow: 0 2px 12px rgba(138,74,243,0.07);
-            border: none;
-            padding: 1.25rem 1rem;
-            margin-bottom: 0.5rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         #calendar-view .activity-card:hover {
-            transform: translateY(-3px) scale(1.01);
-            box-shadow: 0 8px 25px rgba(169,127,251,0.13);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
         #calendar-view .day-number {
-            color: var(--accent-yellow);
             font-size: 2rem;
             font-weight: 800;
+            color: var(--accent-yellow);
         }
         .form-input, .form-textarea {
             background-color: var(--bg-primary) !important;
             border: 1px solid var(--border-color) !important;
             color: var(--text-primary) !important;
+            width: 100%;
             border-radius: 0.5rem;
-            font-size: 1rem;
             padding: 0.75rem;
-            margin-bottom: 0.25rem;
-            box-shadow: none;
         }
         .form-input:focus, .form-textarea:focus {
+            outline: none;
             border-color: var(--accent-indigo-hover) !important;
             box-shadow: 0 0 0 2px var(--accent-indigo);
-            outline: none;
         }
         .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
             color: var(--text-secondary);
-            font-size: 0.98rem;
-            margin-bottom: 0.2rem;
         }
         #mobile-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
             background-color: var(--bg-primary);
-            box-shadow: 0 2px 12px rgba(138,74,243,0.04);
+            z-index: 100;
+            transition: left 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
         }
-        #progress-container {
-            background-color: #232029;
-            border-radius: 99px;
-            overflow: hidden;
-            height: 10px;
-            margin: 1.2rem 0 1.5rem 0;
-            box-shadow: 0 2px 8px rgba(138,74,243,0.08);
+        #mobile-menu.open {
+            left: 0;
         }
-        #progress-bar {
-            background-color: var(--accent-yellow);
-            border-radius: 99px;
-            transition: width 0.5s cubic-bezier(.4,0,.2,1);
+        #mobile-menu-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .view-section {
+            transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+        }
+        .hidden {
+            display: block !important;
+            opacity: 0;
+            transform: scale(0.97);
+            pointer-events: none;
+            position: absolute;
+            width: 100%;
+        }
+        .visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+            position: static;
+        }
+        #toast-container {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            width: 90%;
+            max-width: 500px;
         }
         .toast {
             background-color: var(--bg-secondary);
             color: var(--text-primary);
-            box-shadow: 0 4px 20px rgba(138,74,243,0.13);
+            padding: 0.75rem 1.25rem;
             border-radius: 0.75rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: toast-in 0.3s ease forwards;
         }
-        h1, h2, h3 {
-            color: var(--text-primary);
-            font-weight: 700;
-            letter-spacing: 0.01em;
+        .toast.toast-out {
+            animation: toast-out 0.3s ease forwards;
         }
-        h1 {
-            font-size: 2.25rem;
-            line-height: 2.5rem;
-            margin-bottom: 0.5rem;
+        @keyframes toast-in {
+            to { opacity: 1; transform: translateY(0); }
         }
-        h2 {
-            font-size: 1.75rem;
-            line-height: 2rem;
-            margin-bottom: 0.4rem;
-        }
-        h3 {
-            font-size: 1.25rem;
-            line-height: 1.75rem;
-            margin-bottom: 0.3rem;
-        }
-        main, section, aside, #main-content, #desktop-sidebar {
-            box-sizing: border-box;
+        @keyframes toast-out {
+            to { opacity: 0; transform: translateY(20px); }
         }
         @media (max-width: 767px) {
             #desktop-sidebar {
                 display: none;
-            }
-            main {
-                padding: 1.2rem 0.5rem !important;
             }
         }
         @media (min-width: 768px) {
@@ -199,13 +233,11 @@
             }
             main {
                  display: flex;
-                 gap: 2.5rem;
-                 padding: 2.5rem 2rem 2rem 2rem !important;
+                 gap: 1.5rem;
             }
             #desktop-sidebar {
                 width: 25%;
                 min-width: 280px;
-                margin-right: 2.5rem;
             }
             #main-content {
                 width: 75%;
