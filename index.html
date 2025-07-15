@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,10 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- BASE Y TEMA OSCURO REFINADO --- */
         :root {
             --bg-primary: #121212;
             --bg-secondary: #1E1E1E;
@@ -23,15 +20,12 @@
             --accent-yellow: #facc15;
             --border-color: #333;
         }
-
         html, body {
             background-color: var(--bg-primary) !important;
             color: var(--text-primary) !important;
             font-family: 'Inter', sans-serif;
             scroll-behavior: smooth;
         }
-
-        /* --- TIPOGRAFÍA Y JERARQUÍA --- */
         h1, h2, h3 { font-weight: 700; }
         h1 { font-size: 2.25rem; line-height: 2.5rem; }
         h2 { font-size: 1.75rem; line-height: 2rem; }
@@ -40,8 +34,6 @@
         .font-medium { font-weight: 500; }
         .font-semibold { font-weight: 600; }
         .font-bold { font-weight: 700; }
-        
-        /* --- ESTILOS DE COMPONENTES --- */
         header, footer, .component-bg {
             background-color: var(--bg-secondary) !important;
             border-color: var(--border-color) !important;
@@ -49,8 +41,6 @@
         .soft-shadow {
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
         }
-        
-        /* --- BARRA DE PROGRESO --- */
         #progress-container {
             background-color: #2a2a2e;
             border-radius: 99px;
@@ -64,8 +54,6 @@
             background-color: var(--accent-yellow);
             transition: width 0.5s ease-in-out;
         }
-
-        /* --- BOTONES --- */
         .primary-button {
             background-color: var(--accent-indigo) !important;
             color: var(--text-primary) !important;
@@ -102,8 +90,6 @@
             font-weight: 700;
             border-color: var(--accent-yellow) !important;
         }
-
-        /* --- VISTA DE DÍA (CON ICONOS) --- */
         #day-view .activity-item {
             display: flex;
             align-items: flex-start;
@@ -113,8 +99,8 @@
         #day-view .activity-icon {
             flex-shrink: 0;
             color: var(--accent-indigo-hover);
-            width: 2rem; /* 32px */
-            height: 2rem; /* 32px */
+            width: 2rem;
+            height: 2rem;
             margin-top: 0.125rem;
         }
         #day-view .activity-content p {
@@ -122,14 +108,12 @@
             font-weight: 500;
             color: var(--text-primary);
         }
-         #day-view .activity-content ul {
+        #day-view .activity-content ul {
             list-style: disc;
             padding-left: 1.25rem;
             margin-top: 0.5rem;
             color: var(--text-secondary);
         }
-
-        /* --- VISTA CALENDARIO --- */
         #calendar-view .activity-card {
             background-color: var(--bg-secondary);
             padding: 1.25rem;
@@ -146,8 +130,6 @@
             font-weight: 800;
             color: var(--accent-yellow);
         }
-        
-        /* --- FORMULARIO DE EDICIÓN --- */
         .form-input, .form-textarea {
             background-color: var(--bg-primary) !important;
             border: 1px solid var(--border-color) !important;
@@ -167,8 +149,6 @@
             font-weight: 500;
             color: var(--text-secondary);
         }
-
-        /* --- MENÚ MÓVIL --- */
         #mobile-menu {
             position: fixed;
             top: 0;
@@ -189,13 +169,11 @@
             flex-grow: 1;
             overflow-y: auto;
         }
-
-        /* --- TRANSICIONES ENTRE VISTAS --- */
         .view-section {
             transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
         }
         .hidden {
-            display: block !important; /* Override Tailwind's hidden */
+            display: block !important;
             opacity: 0;
             transform: scale(0.97);
             pointer-events: none;
@@ -208,8 +186,6 @@
             pointer-events: auto;
             position: static;
         }
-
-        /* --- NOTIFICACIONES "TOAST" --- */
         #toast-container {
             position: fixed;
             bottom: 1rem;
@@ -243,8 +219,6 @@
         @keyframes toast-out {
             to { opacity: 0; transform: translateY(20px); }
         }
-        
-        /* Ocultar sidebar en móvil */
         @media (max-width: 767px) {
             #desktop-sidebar {
                 display: none;
@@ -272,19 +246,16 @@
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100">
-
     <header class="p-4 component-bg">
         <h1 class="text-2xl font-bold text-center">Interrail 2025</h1>
         <div id="progress-container">
             <div id="progress-bar"></div>
         </div>
     </header>
-
     <main class="p-4">
         <button id="mobile-hamburger" class="md:hidden fixed top-4 right-4 z-50 p-2 rounded-full bg-indigo-600">
             <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
-
         <aside id="desktop-sidebar" class="component-bg p-4 rounded-lg soft-shadow">
             <h2 class="text-xl font-semibold mb-4">Días del Viaje</h2>
             <div class="space-y-2 mb-4">
@@ -293,7 +264,6 @@
             </div>
             <div id="day-navigation" class="space-y-1"></div>
         </aside>
-
         <nav id="mobile-menu">
             <div id="mobile-menu-content">
                 <div class="flex justify-between items-center mb-4">
@@ -309,7 +279,6 @@
                 <div id="mobile-day-navigation" class="space-y-1"></div>
             </div>
         </nav>
-        
         <section id="main-content" class="component-bg p-4 rounded-lg soft-shadow relative overflow-hidden">
             <div id="day-view" class="view-section visible">
                 <h2 id="day-title" class="text-3xl font-bold mb-1">Selecciona un día</h2>
@@ -344,12 +313,10 @@
                     </div>
                 </div>
             </div>
-            
             <div id="calendar-view" class="view-section hidden">
                 <h2 class="text-2xl font-bold text-center mb-4">Calendario del Viaje</h2>
                 <div id="activity-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </div>
-
             <div id="edit-day-form" class="view-section hidden">
                 <h2 class="text-2xl font-bold mb-4">Editar Día</h2>
                 <div class="space-y-4">
@@ -379,60 +346,51 @@
                     </div>
                 </div>
             </div>
-
         </section>
     </main>
-
     <footer class="text-center p-4 mt-4 text-sm text-gray-400 component-bg">
         <p>&copy; 2025 Interrail. Todos los derechos reservados.</p>
     </footer>
-
     <div id="toast-container"></div>
-    
     <script>
         let itinerary = [];
         let selectedDayIdx = 0;
-
-        // --- Mock de datos para demostración ---
-        function generateMockData() {
-            const cities = ["París", "Ámsterdam", "Berlín", "Praga", "Viena", "Budapest", "Roma", "Florencia", "Niza", "Barcelona"];
-            const mockItinerary = [];
-            for (let i = 0; i < 30; i++) {
-                const city = cities[Math.floor(i / 3) % cities.length];
-                mockItinerary.push({
-                    day: i + 1,
-                    city: city,
-                    part: `Parte ${Math.floor(i / 10) + 1}`,
-                    activities: [
-                        `Visitar monumento en ${city}`,
-                        `Comer plato típico de ${city}`,
-                        `Paseo nocturno por ${city}`
-                    ],
-                    sleep: `Hostal en ${city}`,
-                    startDate: new Date(2025, 6, i + 1) // Julio 2025
-                });
-            }
-            return mockItinerary;
-        }
-
+        // --- Cargar datos reales desde el backend ---
         async function cargarItinerario() {
-            // En un entorno real, aquí iría el fetch. Usamos datos mock.
-            itinerary = generateMockData();
-            renderNavigation();
-            showDayDetails(0);
+            try {
+                const res = await fetch("/api/leer");
+                const data = await res.json();
+                if (data.error) {
+                    showToast("Error al cargar el itinerario: " + data.error);
+                    itinerary = [];
+                } else if (data.itinerary?.length) {
+                    itinerary = data.itinerary;
+                    itinerary.forEach(day => {
+                        if (typeof day.startDate === 'string') {
+                            day.startDate = new Date(day.startDate);
+                        }
+                    });
+                } else {
+                    itinerary = [];
+                }
+                renderNavigation();
+                showDayDetails(0);
+            } catch (error) {
+                showToast("Error cargando itinerario: " + error.message);
+                itinerary = [];
+                renderNavigation();
+                showDayDetails(0);
+            }
         }
-
         document.addEventListener('DOMContentLoaded', () => {
             cargarItinerario();
             setupEventListeners();
         });
-
         function renderNavigation() {
             const dayNav = document.getElementById('day-navigation');
             const mobileDayNav = document.getElementById('mobile-day-navigation');
             dayNav.innerHTML = '';
             mobileDayNav.innerHTML = '';
-            
             let currentPart = "";
             itinerary.forEach((day, index) => {
                 if (day.part !== currentPart) {
@@ -443,16 +401,13 @@
                     dayNav.appendChild(partTitle);
                     mobileDayNav.appendChild(partTitle.cloneNode(true));
                 }
-                
                 const button = document.createElement('button');
                 button.textContent = `Día ${day.day}: ${day.city}`;
                 button.className = 'day-button';
                 button.dataset.dayIndex = index;
-                
                 const desktopButton = button.cloneNode(true);
                 desktopButton.addEventListener('click', () => showDayDetails(index));
                 dayNav.appendChild(desktopButton);
-
                 const mobileButton = button.cloneNode(true);
                 mobileButton.addEventListener('click', () => {
                     showDayDetails(index);
@@ -461,36 +416,29 @@
                 mobileDayNav.appendChild(mobileButton);
             });
         }
-        
         function updateActiveButton(idx) {
             document.querySelectorAll('.day-button').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.dayIndex == idx);
             });
         }
-
         function updateProgressBar(idx) {
-            const progress = ((idx + 1) / itinerary.length) * 100;
+            const progress = itinerary.length ? ((idx + 1) / itinerary.length) * 100 : 0;
             document.getElementById('progress-bar').style.width = `${progress}%`;
         }
-
         function showDayDetails(idx) {
             selectedDayIdx = idx;
             const day = itinerary[idx];
             if (!day) return;
-            
             document.getElementById('day-title').textContent = `Día ${day.day}`;
-            document.getElementById('day-location').textContent = day.city;
+            document.getElementById('day-location').textContent = day.city || '';
             document.getElementById('activity-morning').textContent = day.activities?.[0] || 'Sin actividad';
             document.getElementById('activity-afternoon').textContent = day.activities?.[1] || 'Sin actividad';
             document.getElementById('activity-night').textContent = day.activities?.[2] || 'Sin actividad';
             document.getElementById('day-sleep').textContent = day.sleep || 'Sin definir';
-
             updateActiveButton(idx);
             updateProgressBar(idx);
-            
             switchView('day-view');
         }
-
         function showCalendarView() {
             const container = document.getElementById('activity-cards-container');
             container.innerHTML = '';
@@ -498,7 +446,7 @@
                 const card = document.createElement('div');
                 card.className = 'activity-card soft-shadow cursor-pointer';
                 card.innerHTML = `
-                    <div class="day-number">${day.startDate.getDate()}</div>
+                    <div class="day-number">${day.startDate instanceof Date ? day.startDate.getDate() : ''}</div>
                     <div class="font-semibold text-lg">${day.city}</div>
                     <p class="text-sm text-gray-400">${day.activities?.[0] || ''}</p>
                 `;
@@ -507,7 +455,6 @@
             });
             switchView('calendar-view');
         }
-
         function showEditDayForm(idx) {
             const day = itinerary[idx];
             if (!day) return;
@@ -519,7 +466,6 @@
             document.getElementById('edit-sleep').value = day.sleep || '';
             switchView('edit-day-form');
         }
-        
         function switchView(viewIdToShow) {
             document.querySelectorAll('.view-section').forEach(section => {
                 if (section.id === viewIdToShow) {
@@ -530,13 +476,11 @@
                     section.classList.add('hidden');
                 }
             });
-            // Actualizar texto del botón de cambio de vista
             const isCalendar = viewIdToShow === 'calendar-view';
             document.getElementById('toggle-view-button').textContent = isCalendar ? "Ver Detalles del Día" : "Ver Calendario";
             document.getElementById('mobile-toggle-view-button').textContent = isCalendar ? "Ver Detalles del Día" : "Ver Calendario";
         }
-
-        function saveDayChanges() {
+        async function saveDayChanges() {
             const day = itinerary[selectedDayIdx];
             day.city = document.getElementById('edit-location').value;
             day.activities = [
@@ -545,39 +489,54 @@
                 document.getElementById('edit-night-activity').value
             ];
             day.sleep = document.getElementById('edit-sleep').value;
-            
-            console.log('Guardado (simulado):', day);
-            showToast('Día guardado correctamente');
-            
-            // Re-render navegación por si cambió la ciudad
-            renderNavigation();
-            showDayDetails(selectedDayIdx);
+            // Prepara el array para guardar (con startDate en string ISO)
+            const itineraryToSend = itinerary.map(day => ({
+                ...day,
+                startDate: day.startDate instanceof Date ? day.startDate.toISOString().slice(0, 10) : day.startDate,
+                activities: Array.isArray(day.activities) ? day.activities : ['', '', ''],
+                city: day.city ?? '',
+                part: day.part ?? '',
+                day: day.day ?? (itinerary.indexOf(day) + 1),
+                sleep: day.sleep ?? ''
+            }));
+            if (!Array.isArray(itineraryToSend) || !itineraryToSend.length) {
+                showToast('No hay datos para guardar');
+                return;
+            }
+            try {
+                const res = await fetch('/api/guardar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ itinerario: itineraryToSend })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    showToast('Día guardado correctamente');
+                    await cargarItinerario();
+                    showDayDetails(selectedDayIdx);
+                } else {
+                    showToast('Error al guardar: ' + (data.error || 'Error desconocido'));
+                }
+            } catch (e) {
+                showToast('Error de red al guardar: ' + e.message);
+            }
         }
-
-        // --- GESTIÓN DE NOTIFICACIONES TOAST ---
         function showToast(message) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.textContent = message;
             container.appendChild(toast);
-            
             setTimeout(() => {
                 toast.classList.add('toast-out');
                 toast.addEventListener('animationend', () => toast.remove());
             }, 2500);
         }
-
-        // --- GESTIÓN MENÚ MÓVIL ---
         function openMobileMenu() { document.getElementById('mobile-menu').classList.add('open'); }
         function closeMobileMenu() { document.getElementById('mobile-menu').classList.remove('open'); }
-
-        // --- EVENT LISTENERS ---
         function setupEventListeners() {
             document.getElementById('mobile-hamburger').addEventListener('click', openMobileMenu);
             document.getElementById('close-mobile-menu').addEventListener('click', closeMobileMenu);
-            
-            // Botones de acción
             document.getElementById('toggle-view-button').addEventListener('click', () => {
                 const isDayViewVisible = document.getElementById('day-view').classList.contains('visible');
                 isDayViewVisible ? showCalendarView() : showDayDetails(selectedDayIdx);
@@ -587,18 +546,14 @@
                 isDayViewVisible ? showCalendarView() : showDayDetails(selectedDayIdx);
                 closeMobileMenu();
             });
-            
             document.getElementById('edit-day-button').addEventListener('click', () => showEditDayForm(selectedDayIdx));
             document.getElementById('mobile-edit-day-button').addEventListener('click', () => {
                 showEditDayForm(selectedDayIdx);
                 closeMobileMenu();
             });
-            
             document.getElementById('save-day-button').addEventListener('click', saveDayChanges);
             document.getElementById('cancel-edit-button').addEventListener('click', () => showDayDetails(selectedDayIdx));
         }
-
-        // --- PWA Service Worker (simulado para compatibilidad) ---
         if ('serviceWorker' in navigator) {
             const swContent = `
                 self.addEventListener('fetch', event => {
@@ -616,4 +571,3 @@
     </script>
 </body>
 </html>
-```
