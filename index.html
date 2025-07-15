@@ -752,20 +752,20 @@ if (document.getElementById('save-day-button'))
         const morning = document.getElementById('edit-morning-activity').value;
         const afternoon = document.getElementById('edit-afternoon-activity').value;
         const night = document.getElementById('edit-night-activity').value;
-        // Actualiza el itinerario local
+        // Actualiza el itinerario local (asegura todos los campos)
         itinerary[selectedDayIdx].city = city;
         itinerary[selectedDayIdx].activities = [morning, afternoon, night];
+        // Si tienes más campos editables, actualízalos aquí
         // Antes de enviar, convierte startDate a string ISO
         const itineraryToSend = itinerary.map(day => ({
             ...day,
             startDate: day.startDate instanceof Date ? day.startDate.toISOString().slice(0, 10) : day.startDate
         }));
-        // BLOQUEA SI EL ARRAY ESTÁ VACÍO
         if (!Array.isArray(itineraryToSend) || !itineraryToSend.length) {
             alert('No hay datos para guardar');
+            console.log('Intento de guardar con array vacío:', itineraryToSend);
             return;
         }
-        // Envía al backend
         try {
             const res = await fetch('/api/guardar', {
                 method: 'POST',
@@ -777,7 +777,7 @@ if (document.getElementById('save-day-button'))
                 alert('Día guardado correctamente');
                 document.getElementById('edit-day-form').classList.add('hidden');
                 document.getElementById('day-view').classList.remove('hidden');
-                renderNavigation();
+                await cargarItinerario();
                 showDayDetails(selectedDayIdx);
             } else {
                 alert('Error al guardar: ' + (data.error || 'Error desconocido'));
