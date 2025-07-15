@@ -753,13 +753,18 @@ if (document.getElementById('save-day-button'))
         const afternoon = document.getElementById('edit-afternoon-activity').value;
         const night = document.getElementById('edit-night-activity').value;
         // Actualiza el itinerario local (asegura todos los campos)
-        itinerary[selectedDayIdx].city = city;
-        itinerary[selectedDayIdx].activities = [morning, afternoon, night];
+        const dayObj = itinerary[selectedDayIdx];
+        dayObj.city = city;
+        dayObj.activities = [morning, afternoon, night];
         // Si tienes más campos editables, actualízalos aquí
         // Antes de enviar, convierte startDate a string ISO
         const itineraryToSend = itinerary.map(day => ({
             ...day,
-            startDate: day.startDate instanceof Date ? day.startDate.toISOString().slice(0, 10) : day.startDate
+            startDate: day.startDate instanceof Date ? day.startDate.toISOString().slice(0, 10) : day.startDate,
+            activities: Array.isArray(day.activities) ? day.activities : ['', '', ''],
+            city: day.city ?? '',
+            part: day.part ?? '',
+            day: day.day ?? (itinerary.indexOf(day) + 1)
         }));
         if (!Array.isArray(itineraryToSend) || !itineraryToSend.length) {
             alert('No hay datos para guardar');
