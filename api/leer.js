@@ -198,6 +198,7 @@ export default async function handler(req, res) {
         city: day.city ?? '',
         activities: Array.isArray(day.activities) ? day.activities : ['', '', ''],
         part: day.part ?? '',
+        sleep: day.sleep ?? '', // <-- Añadir esta línea
       }));
     }
     itinerary.forEach(day => {
